@@ -1,18 +1,27 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-      <div class="container mx-auto px-4 py-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+    <!-- Header with Glassmorphism -->
+    <header class="glass-header sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200/50 shadow-sm">
+      <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" @click="router.push('/')">
-              ← Voltar
+            <Button variant="ghost" size="sm" @click="router.push('/')" class="gap-2">
+              <ArrowLeft class="h-4 w-4" />
+              Voltar
             </Button>
-            <h1 class="text-2xl font-bold text-gray-900">Métricas e Análises</h1>
+            <div class="border-l border-gray-300 pl-4">
+              <h1 class="text-xl font-semibold text-gray-900">Métricas e Análises</h1>
+              <p class="text-xs text-gray-500">Visualize estatísticas de engajamento</p>
+            </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">{{ authStore.user?.name }}</span>
-            <Button variant="outline" size="sm" @click="handleLogout">
+          <div class="flex items-center space-x-3">
+            <Button variant="outline" size="sm" @click="loadMetrics" class="gap-2">
+              <RefreshCw class="h-4 w-4" />
+              Atualizar
+            </Button>
+            <span class="text-sm text-gray-600 font-medium">{{ authStore.user?.name }}</span>
+            <Button variant="outline" size="sm" @click="handleLogout" class="gap-2">
+              <LogOut class="h-4 w-4" />
               Sair
             </Button>
           </div>
@@ -21,184 +30,194 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-6 py-8">
       <div class="max-w-7xl mx-auto space-y-6">
-        <!-- Info Alert -->
-        <Alert>
-          <p class="text-sm">
-            <strong>Dica:</strong> Clique em uma barra do gráfico para filtrar as mensagens por edital específico.
-          </p>
-        </Alert>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent class="p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Total de Mensagens</p>
-                  <p class="text-3xl font-bold text-gray-900 mt-2">
-                    {{ isLoading ? '...' : metrics?.total_messages || 0 }}
-                  </p>
-                </div>
-                <div class="p-3 bg-blue-100 rounded-full">
-                  <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent class="p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Total de Usuários</p>
-                  <p class="text-3xl font-bold text-gray-900 mt-2">
-                    {{ isLoading ? '...' : metrics?.total_users || 0 }}
-                  </p>
-                </div>
-                <div class="p-3 bg-green-100 rounded-full">
-                  <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent class="p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Total de Editais</p>
-                  <p class="text-3xl font-bold text-gray-900 mt-2">
-                    {{ isLoading ? '...' : metrics?.total_editals || 0 }}
-                  </p>
-                </div>
-                <div class="p-3 bg-purple-100 rounded-full">
-                  <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <!-- Loading State -->
+        <div v-if="isLoading" class="text-center py-20">
+          <Spinner />
+          <p class="mt-4 text-gray-600">Carregando métricas...</p>
         </div>
 
-        <!-- Engagement Chart -->
-        <EngagementChart
-          v-if="metrics?.editals"
-          :data="metrics.editals"
-          @edital-click="handleEditalClick"
-        />
+        <!-- Metrics Content -->
+        <div v-else>
+          <!-- Summary Cards with Glassmorphism -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600 mb-1">Total de Mensagens</p>
+                  <p class="text-3xl font-bold text-blue-600">
+                    {{ metrics?.total_messages || 0 }}
+                  </p>
+                </div>
+                <div class="p-3 bg-blue-500/10 rounded-lg">
+                  <MessageCircle class="h-8 w-8 text-blue-600" />
+                </div>
+              </div>
+            </div>
 
-        <!-- Filter Info -->
-        <div v-if="selectedEditalId" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="flex items-center space-x-2">
-            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            <span class="text-sm font-medium text-blue-900">
-              Filtrando por: {{ selectedEditalTitle }}
-            </span>
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600 mb-1">Total de Usuários</p>
+                  <p class="text-3xl font-bold text-green-600">
+                    {{ metrics?.total_users || 0 }}
+                  </p>
+                </div>
+                <div class="p-3 bg-green-500/10 rounded-lg">
+                  <Users class="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-600 mb-1">Total de Editais</p>
+                  <p class="text-3xl font-bold text-purple-600">
+                    {{ metrics?.total_editals || 0 }}
+                  </p>
+                </div>
+                <div class="p-3 bg-purple-500/10 rounded-lg">
+                  <FileText class="h-8 w-8 text-purple-600" />
+                </div>
+              </div>
+            </div>
           </div>
-          <Button variant="outline" size="sm" @click="clearFilter">
-            Limpar Filtro
-          </Button>
-        </div>
 
-        <!-- Messages List -->
-        <MessagesList
-          :messages="messages"
-          :edital-title="selectedEditalTitle"
-          :is-loading="isLoadingMessages"
-        />
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Messages by Edital -->
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Mensagens por Edital</h3>
+                <div class="p-2 bg-blue-500/10 rounded-lg">
+                  <BarChart3 class="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+              <EngagementChart
+                title="Mensagens por Edital"
+                :labels="editalLabels"
+                :data="messageData"
+                type="bar"
+              />
+            </div>
+
+            <!-- Users by Edital -->
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Usuários por Edital</h3>
+                <div class="p-2 bg-green-500/10 rounded-lg">
+                  <TrendingUp class="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+              <EngagementChart
+                title="Usuários por Edital"
+                :labels="editalLabels"
+                :data="userData"
+                type="line"
+              />
+            </div>
+
+            <!-- Distribution Pie Chart -->
+            <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-6 lg:col-span-2">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Distribuição de Mensagens</h3>
+                <div class="p-2 bg-purple-500/10 rounded-lg">
+                  <PieChart class="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+              <EngagementChart
+                title="Distribuição de Mensagens"
+                :labels="editalLabels"
+                :data="messageData"
+                type="pie"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { metricsService } from '@/services/metrics.service'
-import Card from '@/common/components/ui/Card.vue'
-import CardContent from '@/common/components/ui/CardContent.vue'
 import Button from '@/common/components/ui/Button.vue'
-import Alert from '@/common/components/ui/Alert.vue'
+import Spinner from '@/common/components/ui/Spinner.vue'
 import EngagementChart from '@/modules/metricas/components/EngagementChart.vue'
-import MessagesList from '@/modules/metricas/components/MessagesList.vue'
-import type { EngagementMetricsResponse, Message } from '@/common/types/api.types'
+import { 
+  ArrowLeft, 
+  RefreshCw, 
+  LogOut, 
+  MessageCircle, 
+  Users, 
+  FileText,
+  BarChart3,
+  TrendingUp,
+  PieChart
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const uiStore = useUiStore()
 
-const metrics = ref<EngagementMetricsResponse | null>(null)
-const messages = ref<Message[]>([])
-const selectedEditalId = ref<string | null>(null)
-const selectedEditalTitle = ref<string>('')
+const metrics = ref(null)
 const isLoading = ref(false)
-const isLoadingMessages = ref(false)
+
+const editalLabels = computed(() => {
+  return metrics.value?.by_edital?.map(e => e.edital_title.substring(0, 30)) || []
+})
+
+const messageData = computed(() => {
+  return metrics.value?.by_edital?.map(e => e.message_count) || []
+})
+
+const userData = computed(() => {
+  return metrics.value?.by_edital?.map(e => e.user_count) || []
+})
 
 const loadMetrics = async () => {
   isLoading.value = true
   try {
     metrics.value = await metricsService.getEngagementMetrics()
   } catch (error) {
-    console.error('Error loading metrics:', error)
+    console.error('Erro ao carregar métricas:', error)
     uiStore.showToast({
       type: 'error',
-      message: 'Erro ao carregar métricas',
+      message: 'Erro ao carregar métricas'
     })
   } finally {
     isLoading.value = false
   }
 }
 
-const loadMessages = async (editalId?: string) => {
-  isLoadingMessages.value = true
-  try {
-    messages.value = await metricsService.getEditalMessages(editalId)
-  } catch (error) {
-    console.error('Error loading messages:', error)
-    uiStore.showToast({
-      type: 'error',
-      message: 'Erro ao carregar mensagens',
-    })
-  } finally {
-    isLoadingMessages.value = false
-  }
-}
-
-const handleEditalClick = (editalId: string) => {
-  selectedEditalId.value = editalId
-  const edital = metrics.value?.editals.find(e => e.id === editalId)
-  selectedEditalTitle.value = edital?.title || ''
-  loadMessages(editalId)
-}
-
-const clearFilter = () => {
-  selectedEditalId.value = null
-  selectedEditalTitle.value = ''
-  loadMessages()
-}
-
 const handleLogout = () => {
   authStore.logout()
   uiStore.showToast({
     type: 'success',
-    message: 'Logout realizado com sucesso',
+    message: 'Logout realizado com sucesso'
   })
   router.push('/login')
 }
 
 onMounted(() => {
   loadMetrics()
-  loadMessages()
 })
 </script>
+
+<style scoped>
+.glass-header {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-card {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+</style>

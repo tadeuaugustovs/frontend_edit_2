@@ -30,7 +30,7 @@ class ApiClient {
         const token = localStorage.getItem('access_token')
 
         if (token) {
-          config.headers.Authorization = `Token ${token}`
+          config.headers.Authorization = `Bearer ${token}`
         }
 
         return config

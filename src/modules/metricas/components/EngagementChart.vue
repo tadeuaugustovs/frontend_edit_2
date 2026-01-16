@@ -1,215 +1,111 @@
 <template>
-  <Card>
-    <CardHeader>
-      <CardTitle>Engajamento por Edital</CardTitle>
-      <CardDescription>
-        Clique em uma barra para filtrar mensagens por edital
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div class="space-y-6">
-        <!-- Bar Chart -->
-        <div class="h-80">
-          <canvas ref="barChartRef"></canvas>
-        </div>
-
-        <!-- Pie Chart -->
-        <div class="h-64">
-          <canvas ref="pieChartRef"></canvas>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+  <div class="h-80">
+    <canvas ref="chartCanvas"></canvas>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
-import {
-  Chart,
-  BarController,
-  PieController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js'
-import Card from '@/common/components/ui/Card.vue'
-import CardHeader from '@/common/components/ui/CardHeader.vue'
-import CardTitle from '@/common/components/ui/CardTitle.vue'
-import CardDescription from '@/common/components/ui/CardDescription.vue'
-import CardContent from '@/common/components/ui/CardContent.vue'
-import type { EditalMetrics } from '@/common/types/api.types'
+import { ref, onMounted, watch } from 'vue'
+import Chart from 'chart.js/auto'
 
-// Register Chart.js components
-Chart.register(
-  BarController,
-  PieController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-)
-
-export interface EngagementChartProps {
-  data: EditalMetrics[]
-}
-
-const props = defineProps<EngagementChartProps>()
-
-const emit = defineEmits<{
-  'edital-click': [id: string]
+const props = defineProps<{
+  title: string
+  labels: string[]
+  data: number[]
+  type?: 'bar' | 'line' | 'pie'
+  backgroundColor?: string | string[]
 }>()
 
-const barChartRef = ref<HTMLCanvasElement | null>(null)
-const pieChartRef = ref<HTMLCanvasElement | null>(null)
-let barChart: Chart | null = null
-let pieChart: Chart | null = null
+const chartCanvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: Chart | null = null
 
-const colors = [
-  'rgba(59, 130, 246, 0.8)',   // blue
-  'rgba(16, 185, 129, 0.8)',   // green
-  'rgba(139, 92, 246, 0.8)',   // purple
-  'rgba(251, 146, 60, 0.8)',   // orange
-  'rgba(236, 72, 153, 0.8)',   // pink
-]
+const createChart = () => {
+  if (!chartCanvas.value) return
 
-const createBarChart = () => {
-  if (!barChartRef.value || !props.data.length) return
-
-  const ctx = barChartRef.value.getContext('2d')
-  if (!ctx) return
-
-  // Destroy existing chart
-  if (barChart) {
-    barChart.destroy()
+  if (chartInstance) {
+    chartInstance.destroy()
   }
 
-  barChart = new Chart(ctx, {
-    type: 'bar',
+  const ctx = chartCanvas.value.getContext('2d')
+  if (!ctx) return
+
+  const colors = props.backgroundColor || [
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+  ]
+
+  chartInstance = new Chart(ctx, {
+    type: props.type || 'bar',
     data: {
-      labels: props.data.map(d => d.title.substring(0, 30) + '...'),
-      datasets: [
-        {
-          label: 'Mensagens',
-          data: props.data.map(d => d.messageCount),
-          backgroundColor: colors,
-          borderColor: colors.map(c => c.replace('0.8', '1')),
-          borderWidth: 1,
-        },
-      ],
+      labels: props.labels,
+      datasets: [{
+        label: props.title,
+        data: props.data,
+        backgroundColor: colors,
+        borderColor: props.type === 'line' ? '#3b82f6' : undefined,
+        borderWidth: props.type === 'line' ? 3 : 1,
+        tension: 0.4,
+        fill: props.type === 'line' ? false : undefined
+      }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index
-          emit('edital-click', props.data[index].id)
-        }
-      },
       plugins: {
         legend: {
-          display: false,
+          display: props.type === 'pie',
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: {
+              size: 12
+            }
+          }
         },
         tooltip: {
-          callbacks: {
-            label: (context) => {
-              const edital = props.data[context.dataIndex]
-              return [
-                `Mensagens: ${edital.messageCount}`,
-                `Usuários: ${edital.uniqueUsers}`,
-                `Última mensagem: ${edital.lastMessage}`,
-              ]
-            },
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          titleFont: {
+            size: 14
           },
-        },
+          bodyFont: {
+            size: 13
+          },
+          cornerRadius: 8
+        }
       },
-      scales: {
+      scales: props.type !== 'pie' ? {
         y: {
           beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
           ticks: {
-            precision: 0,
+            font: {
+              size: 11
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false
           },
-        },
-      },
-    },
-  })
-}
-
-const createPieChart = () => {
-  if (!pieChartRef.value || !props.data.length) return
-
-  const ctx = pieChartRef.value.getContext('2d')
-  if (!ctx) return
-
-  // Destroy existing chart
-  if (pieChart) {
-    pieChart.destroy()
-  }
-
-  pieChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: props.data.map(d => d.title.substring(0, 20) + '...'),
-      datasets: [
-        {
-          data: props.data.map(d => d.messageCount),
-          backgroundColor: colors,
-          borderColor: '#fff',
-          borderWidth: 2,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index
-          emit('edital-click', props.data[index].id)
+          ticks: {
+            font: {
+              size: 11
+            }
+          }
         }
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const edital = props.data[context.dataIndex]
-              const total = props.data.reduce((sum, d) => sum + d.messageCount, 0)
-              const percentage = ((edital.messageCount / total) * 100).toFixed(1)
-              return `${edital.messageCount} mensagens (${percentage}%)`
-            },
-          },
-        },
-      },
-    },
+      } : undefined
+    }
   })
 }
 
 onMounted(() => {
-  createBarChart()
-  createPieChart()
+  createChart()
 })
 
-watch(() => props.data, () => {
-  createBarChart()
-  createPieChart()
+watch(() => [props.labels, props.data], () => {
+  createChart()
 }, { deep: true })
-
-onBeforeUnmount(() => {
-  if (barChart) {
-    barChart.destroy()
-  }
-  if (pieChart) {
-    pieChart.destroy()
-  }
-})
 </script>
