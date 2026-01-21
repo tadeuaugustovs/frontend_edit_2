@@ -1,0 +1,175 @@
+/* Accessibility Styles */
+
+/* ============================================
+   CONTRASTE - BORDAS GROSSAS E TEXTOS FORTES
+   ============================================ */
+
+/* Transição suave */
+html {
+  transition: none; /* Sem transição para evitar flickering */
+}
+
+/* Desabilitar transição se reduce-motion estiver ativo */
+html.reduce-motion * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Normal Contrast - Padrão limpo */
+html.contrast-normal {
+  /* Sem alterações - design original */
+}
+
+/* Alto Contraste - Bordas grossas e textos fortes, SEM linhas cinzas */
+html.contrast-high button,
+html.contrast-high input,
+html.contrast-high select,
+html.contrast-high textarea,
+html.contrast-high .glass-card,
+html.contrast-high .border {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+}
+
+html.contrast-high .text-gray-500,
+html.contrast-high .text-gray-600,
+html.contrast-high .text-gray-700,
+html.contrast-high .text-slate-500,
+html.contrast-high .text-slate-600 {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Modo escuro + Alto Contraste */
+html.dark.contrast-high button,
+html.dark.contrast-high input,
+html.dark.contrast-high select,
+html.dark.contrast-high textarea,
+html.dark.contrast-high .glass-card,
+html.dark.contrast-high .border {
+  border-width: 2px !important;
+  border-color: #ffffff !important;
+}
+
+html.dark.contrast-high .text-gray-500,
+html.dark.contrast-high .text-gray-600,
+html.dark.contrast-high .text-gray-700,
+html.dark.contrast-high .text-slate-500,
+html.dark.contrast-high .text-slate-600 {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Máximo Contraste - Preto e branco COM bordas visíveis */
+html.contrast-maximum {
+  filter: grayscale(100%) contrast(200%) brightness(1.1);
+}
+
+html.contrast-maximum button,
+html.contrast-maximum input,
+html.contrast-maximum select,
+html.contrast-maximum textarea,
+html.contrast-maximum .glass-card,
+html.contrast-maximum .border {
+  border-width: 3px !important;
+  border-color: #000000 !important;
+}
+
+html.dark.contrast-maximum button,
+html.dark.contrast-maximum input,
+html.dark.contrast-maximum select,
+html.dark.contrast-maximum textarea,
+html.dark.contrast-maximum .glass-card,
+html.dark.contrast-maximum .border {
+  border-width: 3px !important;
+  border-color: #ffffff !important;
+}
+
+/* ============================================
+   REDUCE MOTION
+   ============================================ */
+
+/* Reduce Motion */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Enhanced Focus Indicators */
+.enhanced-focus *:focus {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+}
+
+.enhanced-focus button:focus,
+.enhanced-focus a:focus,
+.enhanced-focus input:focus,
+.enhanced-focus textarea:focus,
+.enhanced-focus select:focus {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Screen Reader Optimizations */
+.screen-reader-optimized {
+  /* Ensure proper heading hierarchy */
+}
+
+.screen-reader-optimized [role="button"],
+.screen-reader-optimized [role="link"] {
+  cursor: pointer;
+}
+
+.screen-reader-optimized img:not([alt]) {
+  outline: 2px dashed red;
+}
+
+/* Skip to main content link */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 100;
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+
+/* Ensure sufficient color contrast */
+.contrast-high a,
+.contrast-maximum a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Font size adjustments are handled via root font-size in the context */
+
+/* Ensure buttons and interactive elements are large enough */
+.enhanced-focus button,
+.enhanced-focus a,
+.enhanced-focus input,
+.enhanced-focus select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Print styles for accessibility */
+@media print {
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -150,6 +150,7 @@ import { metricsService } from '@/services/metrics.service'
 import Button from '@/common/components/ui/Button.vue'
 import Spinner from '@/common/components/ui/Spinner.vue'
 import EngagementChart from '@/modules/metricas/components/EngagementChart.vue'
+import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import { 
   ArrowLeft, 
   RefreshCw, 

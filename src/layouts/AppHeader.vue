@@ -47,6 +47,7 @@
 
         <!-- User Menu -->
         <div class="flex items-center space-x-4">
+          <AccessibilityMenu />
           <span v-if="user" class="text-sm text-gray-600 hidden sm:inline">
             {{ user.name }}
           </span>
@@ -124,6 +125,7 @@ import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import Button from '@/common/components/ui/Button.vue'
 import Logo from '@/common/components/ui/Logo.vue'
+import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 
 export interface AppHeaderProps {
   title?: string

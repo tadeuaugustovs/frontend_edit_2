@@ -12,6 +12,7 @@
             </div>
           </div>
           <div class="flex items-center space-x-3">
+            <AccessibilityMenu />
             <span class="text-sm text-gray-600 font-medium">{{ authStore.user?.name }}</span>
             <Button variant="outline" size="sm" @click="handleLogout" class="gap-2">
               <LogOut class="h-4 w-4" />
@@ -550,6 +551,7 @@ import Button from '@/common/components/ui/Button.vue'
 import Logo from '@/common/components/ui/Logo.vue'
 import Badge from '@/common/components/ui/Badge.vue'
 import Spinner from '@/common/components/ui/Spinner.vue'
+import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import { 
   FileText, 
   BarChart3, 
