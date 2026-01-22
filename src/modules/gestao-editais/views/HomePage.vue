@@ -257,7 +257,7 @@
     >
       <div
         @click.stop
-        class="glass-modal backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        class="glass-modal backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
         <!-- Modal Header -->
         <div class="flex items-start justify-between p-6 border-b border-gray-200/50">
@@ -282,228 +282,215 @@
           </button>
         </div>
 
-        <!-- Modal Content -->
+        <!-- Modal Content - Simplificado sem Preview -->
         <div class="flex-1 overflow-y-auto">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-            <!-- Left Column: PDF Viewer -->
-            <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <FileText class="h-4 w-4" />
-                Documento Principal
-              </h3>
-              
-              <div v-if="mainPdfUrl" class="bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                <!-- PDF Viewer with Google Docs Viewer as fallback -->
-                <div class="relative w-full h-[600px]">
-                  <iframe
-                    :src="`https://docs.google.com/viewer?url=${encodeURIComponent(mainPdfUrl)}&embedded=true`"
-                    class="w-full h-full"
-                    frameborder="0"
-                    allow="fullscreen"
-                  ></iframe>
-                  <div class="absolute bottom-4 right-4 flex gap-2">
-                    <a
-                      :href="mainPdfUrl"
-                      target="_blank"
-                      class="px-3 py-2 bg-white/90 hover:bg-white rounded-lg shadow-md text-sm font-medium text-gray-700 flex items-center gap-2 transition-colors"
+          <div class="p-6 space-y-6">
+            <!-- View Mode - Ficha Técnica -->
+            <div v-if="!isEditMode">
+              <!-- Título e Status -->
+              <div class="mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                  <h2 class="text-2xl font-bold text-gray-900">{{ selectedEdital.title }}</h2>
+                  <Badge :variant="getStatusVariant(selectedEdital.status)">
+                    {{ getStatusLabel(selectedEdital.status) }}
+                  </Badge>
+                </div>
+                <p class="text-sm text-gray-500">
+                  Criado em {{ formatDate(selectedEdital.created_at) }}
+                </p>
+              </div>
+
+              <!-- Descrição Completa -->
+              <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Descrição</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-gray-700 leading-relaxed">{{ selectedEdital.description }}</p>
+                </div>
+              </div>
+
+              <!-- Estatísticas Rápidas -->
+              <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                  <div class="flex items-center justify-center gap-2 mb-2">
+                    <FileText class="h-5 w-5 text-blue-600" />
+                    <span class="text-sm font-medium text-blue-900">Metadados</span>
+                  </div>
+                  <p class="text-2xl font-bold text-blue-600">{{ selectedEdital.metadata_count || 0 }}</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                  <div class="flex items-center justify-center gap-2 mb-2">
+                    <Paperclip class="h-5 w-5 text-green-600" />
+                    <span class="text-sm font-medium text-green-900">Arquivos</span>
+                  </div>
+                  <p class="text-2xl font-bold text-green-600">{{ selectedEdital.files_count || 0 }}</p>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4 text-center">
+                  <div class="flex items-center justify-center gap-2 mb-2">
+                    <Calendar class="h-5 w-5 text-purple-600" />
+                    <span class="text-sm font-medium text-purple-900">Status</span>
+                  </div>
+                  <p class="text-sm font-semibold text-purple-600">{{ getStatusLabel(selectedEdital.status) }}</p>
+                </div>
+              </div>
+
+              <!-- Metadados Detalhados -->
+              <div v-if="selectedEdital.metadata && selectedEdital.metadata.length > 0" class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Metadados do Edital</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="space-y-3">
+                    <div
+                      v-for="meta in selectedEdital.metadata"
+                      :key="meta.id"
+                      class="flex justify-between items-center py-2 border-b border-gray-200 last:border-0"
                     >
-                      <ExternalLink class="h-4 w-4" />
-                      Abrir em Nova Aba
-                    </a>
+                      <span class="text-sm font-medium text-gray-600">{{ meta.key }}</span>
+                      <span class="text-sm text-gray-900 font-mono bg-white px-2 py-1 rounded">{{ meta.value }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="bg-gray-50 rounded-lg p-12 text-center border-2 border-dashed border-gray-300">
-                <FileText class="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <p class="text-gray-600 font-medium">Nenhum PDF disponível</p>
-                <p class="text-sm text-gray-500 mt-1">O documento principal não foi anexado</p>
+
+              <!-- Informações Técnicas -->
+              <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Informações Técnicas</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex justify-between py-2 border-b border-gray-200">
+                      <span class="text-gray-600">ID do Edital</span>
+                      <span class="font-mono text-gray-900 bg-white px-2 py-1 rounded text-xs">{{ selectedEdital.id }}</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-200">
+                      <span class="text-gray-600">Data de Criação</span>
+                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.created_at) }}</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-200">
+                      <span class="text-gray-600">Última Atualização</span>
+                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.updated_at) }}</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                      <span class="text-gray-600">Total de Arquivos</span>
+                      <span class="font-medium text-gray-900">{{ selectedEdital.files_count || 0 }} arquivo(s)</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <!-- Additional Files -->
-              <div v-if="!isEditMode && selectedEdital.files && selectedEdital.files.length > 0">
+              <!-- Lista de Arquivos (sem preview) -->
+              <div v-if="selectedEdital.files && selectedEdital.files.length > 0" class="mb-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Paperclip class="h-4 w-4" />
-                  Arquivos Anexos ({{ selectedEdital.files.length }})
+                  Arquivos Anexados ({{ selectedEdital.files.length }})
                 </h3>
-                <div class="space-y-2">
-                  <div
-                    v-for="file in selectedEdital.files"
-                    :key="file.id"
-                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div class="flex items-center gap-3">
-                      <div class="p-2 bg-blue-100 rounded">
-                        <FileText class="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p class="text-sm font-medium text-gray-900">{{ file.name }}</p>
-                        <p class="text-xs text-gray-500">{{ getFileTypeLabel(file.file_type) }}</p>
-                      </div>
-                    </div>
-                    <a
-                      v-if="file.url"
-                      :href="file.url"
-                      target="_blank"
-                      class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <div class="space-y-2">
+                    <div
+                      v-for="file in selectedEdital.files"
+                      :key="file.id"
+                      class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                     >
-                      <ExternalLink class="h-4 w-4 text-gray-600" />
-                    </a>
+                      <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-100 rounded">
+                          <FileText class="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p class="text-sm font-medium text-gray-900">{{ file.name }}</p>
+                          <p class="text-xs text-gray-500">{{ getFileTypeLabel(file.file_type) }}</p>
+                        </div>
+                      </div>
+                      <a
+                        v-if="file.url"
+                        :href="file.url"
+                        target="_blank"
+                        class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <ExternalLink class="h-3 w-3" />
+                        Abrir
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Column: Details / Edit Form -->
-            <div class="space-y-6">
-              <!-- View Mode -->
-              <div v-if="!isEditMode">
-                <!-- Description -->
-                <div>
-                  <h3 class="text-sm font-semibold text-gray-900 mb-2">Descrição</h3>
-                  <p class="text-gray-700">{{ selectedEdital.description }}</p>
-                </div>
+            <!-- Edit Mode -->
+            <div v-else class="space-y-4">
+              <!-- Title -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                <input
+                  v-model="editForm.title"
+                  type="text"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Título do edital"
+                />
+              </div>
 
-                <!-- Stats -->
-                <div class="grid grid-cols-3 gap-4">
-                  <div class="bg-blue-50/50 rounded-lg p-4">
-                    <div class="flex items-center gap-2 mb-1">
-                      <FileText class="h-4 w-4 text-blue-600" />
-                      <span class="text-xs font-medium text-blue-900">Metadados</span>
-                    </div>
-                    <p class="text-2xl font-bold text-blue-600">{{ selectedEdital.metadata_count }}</p>
-                  </div>
-                  <div class="bg-green-50/50 rounded-lg p-4">
-                    <div class="flex items-center gap-2 mb-1">
-                      <Paperclip class="h-4 w-4 text-green-600" />
-                      <span class="text-xs font-medium text-green-900">Arquivos</span>
-                    </div>
-                    <p class="text-2xl font-bold text-green-600">{{ selectedEdital.files_count }}</p>
-                  </div>
-                  <div class="bg-purple-50/50 rounded-lg p-4">
-                    <div class="flex items-center gap-2 mb-1">
-                      <Calendar class="h-4 w-4 text-purple-600" />
-                      <span class="text-xs font-medium text-purple-900">Status</span>
-                    </div>
-                    <p class="text-sm font-semibold text-purple-600">{{ getStatusLabel(selectedEdital.status) }}</p>
-                  </div>
-                </div>
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                <textarea
+                  v-model="editForm.description"
+                  rows="4"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Descrição do edital"
+                ></textarea>
+              </div>
 
-                <!-- Metadata -->
-                <div v-if="selectedEdital.metadata && selectedEdital.metadata.length > 0">
-                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Metadados</h3>
-                  <div class="space-y-2">
-                    <div
-                      v-for="meta in selectedEdital.metadata"
-                      :key="meta.id"
-                      class="flex justify-between py-2 border-b border-gray-100"
+              <!-- Status -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select
+                  v-model="editForm.status"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="open">Aberto</option>
+                  <option value="closed">Fechado</option>
+                  <option value="analyzing">Em Análise</option>
+                  <option value="draft">Rascunho</option>
+                </select>
+              </div>
+
+              <!-- Metadata Fields -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Metadados</label>
+                <div class="space-y-2">
+                  <div
+                    v-for="(meta, index) in editForm.metadata"
+                    :key="index"
+                    class="flex gap-2"
+                  >
+                    <input
+                      v-model="meta.key"
+                      type="text"
+                      placeholder="Chave"
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                    <input
+                      v-model="meta.value"
+                      type="text"
+                      placeholder="Valor"
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                    <button
+                      @click="removeMetadata(index)"
+                      class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <span class="text-sm text-gray-600">{{ meta.key }}</span>
-                      <span class="text-sm font-medium text-gray-900">{{ meta.value }}</span>
-                    </div>
+                      <Trash2 class="h-4 w-4" />
+                    </button>
                   </div>
-                </div>
-
-                <!-- Additional Info -->
-                <div>
-                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Informações Adicionais</h3>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between py-2 border-b border-gray-100">
-                      <span class="text-gray-600">ID do Edital</span>
-                      <span class="font-medium text-gray-900 font-mono text-xs">{{ selectedEdital.id }}</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-100">
-                      <span class="text-gray-600">Data de Criação</span>
-                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.created_at) }}</span>
-                    </div>
-                    <div class="flex justify-between py-2">
-                      <span class="text-gray-600">Última Atualização</span>
-                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.updated_at) }}</span>
-                    </div>
-                  </div>
+                  <button
+                    @click="addMetadata"
+                    class="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                  >
+                    + Adicionar Metadado
+                  </button>
                 </div>
               </div>
 
-              <!-- Edit Mode -->
-              <div v-else class="space-y-4">
-                <!-- Title -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-                  <input
-                    v-model="editForm.title"
-                    type="text"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Título do edital"
-                  />
-                </div>
-
-                <!-- Description -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
-                  <textarea
-                    v-model="editForm.description"
-                    rows="4"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Descrição do edital"
-                  ></textarea>
-                </div>
-
-                <!-- Status -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select
-                    v-model="editForm.status"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="open">Aberto</option>
-                    <option value="closed">Fechado</option>
-                    <option value="analyzing">Em Análise</option>
-                    <option value="draft">Rascunho</option>
-                  </select>
-                </div>
-
-                <!-- Metadata Fields -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Metadados</label>
-                  <div class="space-y-2">
-                    <div
-                      v-for="(meta, index) in editForm.metadata"
-                      :key="index"
-                      class="flex gap-2"
-                    >
-                      <input
-                        v-model="meta.key"
-                        type="text"
-                        placeholder="Chave"
-                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
-                      <input
-                        v-model="meta.value"
-                        type="text"
-                        placeholder="Valor"
-                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
-                      <button
-                        @click="removeMetadata(index)"
-                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 class="h-4 w-4" />
-                      </button>
-                    </div>
-                    <button
-                      @click="addMetadata"
-                      class="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
-                    >
-                      + Adicionar Metadado
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Save Status -->
-                <div v-if="isSaving" class="flex items-center gap-2 text-sm text-blue-600">
-                  <Spinner class="h-4 w-4" />
-                  Salvando alterações...
-                </div>
+              <!-- Save Status -->
+              <div v-if="isSaving" class="flex items-center gap-2 text-sm text-blue-600">
+                <Spinner class="h-4 w-4" />
+                Salvando alterações...
               </div>
             </div>
           </div>

@@ -168,7 +168,7 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 13, // Aumentado para melhor legibilidade
             color: '#6b7280',
             rotate: props.labels.some(label => label.length > 12) ? 30 : 0
           }
@@ -179,11 +179,16 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 13, // Aumentado para melhor legibilidade
             color: '#6b7280'
           },
           splitLine: {
-            lineStyle: { color: '#f3f4f6' }
+            show: true,
+            lineStyle: { 
+              color: '#f9fafb', // Linhas mais suaves
+              width: 1,
+              type: 'solid'
+            }
           }
         },
         series: [{
@@ -216,7 +221,7 @@ const chartOption = computed(() => {
       return {
         ...baseOption,
         grid: {
-          left: '35%', // Espaço extra para nomes longos dos editais
+          left: '40%', // Aumentado para nomes ainda mais longos
           right: '4%',
           bottom: '3%',
           top: props.showTitle ? '15%' : '3%',
@@ -228,11 +233,16 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 13, // Aumentado para melhor legibilidade
             color: '#6b7280'
           },
           splitLine: {
-            lineStyle: { color: '#f3f4f6' }
+            show: true,
+            lineStyle: { 
+              color: '#f9fafb', // Linhas mais suaves
+              width: 1,
+              type: 'solid'
+            }
           }
         },
         yAxis: {
@@ -242,10 +252,10 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 12, // Aumentado para melhor legibilidade
             color: '#6b7280',
             interval: 0,
-            width: 120,
+            width: 150, // Aumentado para evitar truncamento
             overflow: 'truncate'
           }
         },
@@ -320,7 +330,7 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 13, // Aumentado para melhor legibilidade
             color: '#6b7280',
             rotate: props.labels.some(label => label.length > 12) ? 30 : 0
           }
@@ -331,11 +341,16 @@ const chartOption = computed(() => {
             lineStyle: { color: '#e5e7eb' }
           },
           axisLabel: {
-            fontSize: 11,
+            fontSize: 13, // Aumentado para melhor legibilidade
             color: '#6b7280'
           },
           splitLine: {
-            lineStyle: { color: '#f3f4f6' }
+            show: true,
+            lineStyle: { 
+              color: '#f9fafb', // Linhas mais suaves
+              width: 1,
+              type: 'solid'
+            }
           }
         },
         series: [{

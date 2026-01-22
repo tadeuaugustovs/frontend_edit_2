@@ -1,9 +1,9 @@
 <template>
   <div 
-    class="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-sm transition-all duration-300"
+    class="bg-white border border-gray-200 rounded-xl shadow-sm transition-all duration-300"
     :class="{ 
       'opacity-50': !isVisible,
-      'hover:shadow-lg': isVisible 
+      'hover:shadow-md': isVisible 
     }"
   >
     <!-- Header de Controle (só aparece no modo de edição) -->
@@ -52,8 +52,8 @@
         <h3 class="text-lg font-semibold text-slate-800">{{ title }}</h3>
       </div>
 
-      <!-- Área do Gráfico -->
-      <div class="h-80 rounded-lg overflow-hidden">
+      <!-- Área do Gráfico - Altura Fixa Padronizada -->
+      <div class="h-80 rounded-lg overflow-hidden bg-gray-50/30">
         <slot />
       </div>
     </div>
