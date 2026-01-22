@@ -11,6 +11,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Histórico de Conversas</h1>
           </div>
           <div class="flex items-center space-x-4">
+            <AccessibilityMenu />
             <span class="text-sm text-gray-600">{{ authStore.user?.name }}</span>
             <Button variant="outline" size="sm" @click="handleLogout">
               Sair
@@ -71,6 +72,7 @@ import { useUiStore } from '@/common/store/ui'
 import { useConversas } from '@/common/composables/useConversas'
 import Button from '@/common/components/ui/Button.vue'
 import Alert from '@/common/components/ui/Alert.vue'
+import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import SessionsList from '@/modules/historico/components/SessionsList.vue'
 import ChatViewer from '@/modules/historico/components/ChatViewer.vue'
 

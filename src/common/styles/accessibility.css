@@ -15,10 +15,7 @@ html.reduce-motion * {
   transition: none !important;
 }
 
-/* Normal Contrast - Padrão limpo */
-html.contrast-normal {
-  /* Sem alterações - design original */
-}
+/* Normal Contrast - Padrão limpo (sem alterações) */
 
 /* Alto Contraste - Bordas grossas e textos fortes, SEM linhas cinzas */
 html.contrast-high button,
@@ -60,29 +57,64 @@ html.dark.contrast-high .text-slate-600 {
   font-weight: 700 !important;
 }
 
-/* Máximo Contraste - Preto e branco COM bordas visíveis */
-html.contrast-maximum {
-  filter: grayscale(100%) contrast(200%) brightness(1.1);
+/* Máximo Contraste - Remove gradientes e efeitos visuais para cores puras */
+
+/* Modo Claro + Máximo Contraste */
+html.contrast-maximum:not(.dark) {
+  background: #ffffff !important;
+  color: #000000 !important;
 }
 
-html.contrast-maximum button,
-html.contrast-maximum input,
-html.contrast-maximum select,
-html.contrast-maximum textarea,
-html.contrast-maximum .glass-card,
-html.contrast-maximum .border {
-  border-width: 3px !important;
-  border-color: #000000 !important;
+html.contrast-maximum:not(.dark) *,
+html.contrast-maximum:not(.dark) .bg-gradient-to-br,
+html.contrast-maximum:not(.dark) .glass-card,
+html.contrast-maximum:not(.dark) .glass-header,
+html.contrast-maximum:not(.dark) .glass-modal {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #000000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.contrast-maximum:not(.dark) button,
+html.contrast-maximum:not(.dark) input,
+html.contrast-maximum:not(.dark) select,
+html.contrast-maximum:not(.dark) textarea,
+html.contrast-maximum:not(.dark) .border {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+/* Modo Escuro + Máximo Contraste */
+html.dark.contrast-maximum {
+  background: #000000 !important;
+  color: #ffff00 !important; /* Amarelo neon para máxima legibilidade */
+}
+
+html.dark.contrast-maximum *,
+html.dark.contrast-maximum .bg-gradient-to-br,
+html.dark.contrast-maximum .glass-card,
+html.dark.contrast-maximum .glass-header,
+html.dark.contrast-maximum .glass-modal {
+  background: #000000 !important;
+  background-image: none !important;
+  color: #ffff00 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html.dark.contrast-maximum button,
 html.dark.contrast-maximum input,
 html.dark.contrast-maximum select,
 html.dark.contrast-maximum textarea,
-html.dark.contrast-maximum .glass-card,
 html.dark.contrast-maximum .border {
-  border-width: 3px !important;
-  border-color: #ffffff !important;
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffff00 !important;
+  box-shadow: none !important;
 }
 
 /* ============================================
@@ -115,10 +147,7 @@ html.dark.contrast-maximum .border {
   outline-offset: 2px !important;
 }
 
-/* Screen Reader Optimizations */
-.screen-reader-optimized {
-  /* Ensure proper heading hierarchy */
-}
+/* Screen Reader Optimizations - Ensure proper heading hierarchy */
 
 .screen-reader-optimized [role="button"],
 .screen-reader-optimized [role="link"] {
