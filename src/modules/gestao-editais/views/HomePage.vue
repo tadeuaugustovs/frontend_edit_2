@@ -257,7 +257,7 @@
     >
       <div
         @click.stop
-        class="glass-modal backdrop-blur-md bg-white/90 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        class="glass-modal backdrop-blur-md bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
       >
         <!-- Modal Header -->
         <div class="flex items-start justify-between p-6 border-b border-gray-200/50">
@@ -303,8 +303,8 @@
               <!-- Descrição Completa -->
               <div class="mb-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-3">Descrição</h3>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <p class="text-gray-700 leading-relaxed">{{ selectedEdital.description }}</p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedEdital.description }}</p>
                 </div>
               </div>
 
@@ -336,15 +336,15 @@
               <!-- Metadados Detalhados -->
               <div v-if="selectedEdital.metadata && selectedEdital.metadata.length > 0" class="mb-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-3">Metadados do Edital</h3>
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                   <div class="space-y-3">
                     <div
                       v-for="meta in selectedEdital.metadata"
                       :key="meta.id"
-                      class="flex justify-between items-center py-2 border-b border-gray-200 last:border-0"
+                      class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-0"
                     >
-                      <span class="text-sm font-medium text-gray-600">{{ meta.key }}</span>
-                      <span class="text-sm text-gray-900 font-mono bg-white px-2 py-1 rounded">{{ meta.value }}</span>
+                      <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ meta.key }}</span>
+                      <span class="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-700 px-2 py-1 rounded">{{ meta.value }}</span>
                     </div>
                   </div>
                 </div>
@@ -353,23 +353,23 @@
               <!-- Informações Técnicas -->
               <div class="mb-6">
                 <h3 class="text-sm font-semibold text-gray-900 mb-3">Informações Técnicas</h3>
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div class="flex justify-between py-2 border-b border-gray-200">
-                      <span class="text-gray-600">ID do Edital</span>
-                      <span class="font-mono text-gray-900 bg-white px-2 py-1 rounded text-xs">{{ selectedEdital.id }}</span>
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span class="text-gray-600 dark:text-gray-400">ID do Edital</span>
+                      <span class="font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ selectedEdital.id }}</span>
                     </div>
-                    <div class="flex justify-between py-2 border-b border-gray-200">
-                      <span class="text-gray-600">Data de Criação</span>
-                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.created_at) }}</span>
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span class="text-gray-600 dark:text-gray-400">Data de Criação</span>
+                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatDate(selectedEdital.created_at) }}</span>
                     </div>
-                    <div class="flex justify-between py-2 border-b border-gray-200">
-                      <span class="text-gray-600">Última Atualização</span>
-                      <span class="font-medium text-gray-900">{{ formatDate(selectedEdital.updated_at) }}</span>
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span class="text-gray-600 dark:text-gray-400">Última Atualização</span>
+                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatDate(selectedEdital.updated_at) }}</span>
                     </div>
                     <div class="flex justify-between py-2">
-                      <span class="text-gray-600">Total de Arquivos</span>
-                      <span class="font-medium text-gray-900">{{ selectedEdital.files_count || 0 }} arquivo(s)</span>
+                      <span class="text-gray-600 dark:text-gray-400">Total de Arquivos</span>
+                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ selectedEdital.files_count || 0 }} arquivo(s)</span>
                     </div>
                   </div>
                 </div>
@@ -381,20 +381,20 @@
                   <Paperclip class="h-4 w-4" />
                   Arquivos Anexados ({{ selectedEdital.files.length }})
                 </h3>
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                   <div class="space-y-2">
                     <div
                       v-for="file in selectedEdital.files"
                       :key="file.id"
-                      class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                      class="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
                     >
                       <div class="flex items-center gap-3">
                         <div class="p-2 bg-blue-100 rounded">
                           <FileText class="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <p class="text-sm font-medium text-gray-900">{{ file.name }}</p>
-                          <p class="text-xs text-gray-500">{{ getFileTypeLabel(file.file_type) }}</p>
+                          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ file.name }}</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">{{ getFileTypeLabel(file.file_type) }}</p>
                         </div>
                       </div>
                       <a
@@ -420,7 +420,7 @@
                 <input
                   v-model="editForm.title"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Título do edital"
                 />
               </div>
@@ -431,7 +431,7 @@
                 <textarea
                   v-model="editForm.description"
                   rows="4"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Descrição do edital"
                 ></textarea>
               </div>
@@ -441,7 +441,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select
                   v-model="editForm.status"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="open">Aberto</option>
                   <option value="closed">Fechado</option>
@@ -463,13 +463,13 @@
                       v-model="meta.key"
                       type="text"
                       placeholder="Chave"
-                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <input
                       v-model="meta.value"
                       type="text"
                       placeholder="Valor"
-                      class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <button
                       @click="removeMetadata(index)"
@@ -497,7 +497,7 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="flex items-center justify-between gap-3 p-6 border-t border-gray-200/50 bg-gray-50/50">
+        <div class="flex items-center justify-between gap-3 p-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
           <div>
             <Button
               v-if="isEditMode"

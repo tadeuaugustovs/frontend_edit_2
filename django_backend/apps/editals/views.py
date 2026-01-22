@@ -4,14 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from .models import Edital, EditalMetadata, EditalFile
-from .serializers import EditalSerializer, EditalListSerializer
+from .serializers import EditalSerializer, EditalListSerializer, EditalWithFilesSerializer
 
 
 class EditalListCreateView(generics.ListCreateAPIView):
     """
     List all editals or create a new edital.
     GET /api/editals/ - List editals with pagination and filtering
-    POST /api/editals/ - Create new edital
+    POST /api/editals/ - Create new edital (supports both JSON and FormData)
     """
     queryset = Edital.objects.all()
     permission_classes = [IsAuthenticated]
@@ -27,6 +27,11 @@ class EditalListCreateView(generics.ListCreateAPIView):
         """
         if self.request.method == 'GET':
             return EditalListSerializer
+        
+        # For POST, check if it's FormData (file upload) or JSON
+        content_type = self.request.content_type
+        if content_type and 'multipart/form-data' in content_type:
+            return EditalWithFilesSerializer
         return EditalSerializer
     
     def get_queryset(self):
@@ -52,12 +57,13 @@ class EditalListCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         """
         Create a new edital with proper error handling.
+        Supports both JSON and FormData (file uploads).
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         edital = serializer.save()
         
-        # Return the created edital with full details
+        # Return the created edital with full details using standard serializer
         response_serializer = EditalSerializer(edital)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 

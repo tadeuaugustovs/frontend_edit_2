@@ -46,7 +46,7 @@ const props = defineProps<{
   title?: string
   labels: string[]
   data: number[]
-  type?: 'bar' | 'line' | 'pie' | 'doughnut' | 'horizontalBar' | 'area' | 'scatter'
+  type?: 'bar' | 'line' | 'pie' | 'doughnut' | 'donut' | 'horizontalBar' | 'area' | 'scatter'
   showTitle?: boolean
 }>()
 
@@ -114,6 +114,7 @@ const chartOption = computed(() => {
   switch (props.type) {
     case 'pie':
     case 'doughnut':
+    case 'donut':
       return {
         ...baseOption,
         tooltip: {
@@ -130,7 +131,7 @@ const chartOption = computed(() => {
         },
         series: [{
           type: 'pie',
-          radius: props.type === 'doughnut' ? ['35%', '65%'] : '65%',
+          radius: (props.type === 'doughnut' || props.type === 'donut') ? ['35%', '65%'] : '65%',
           center: ['50%', '45%'],
           data: props.labels.map((label, index) => ({
             name: label,

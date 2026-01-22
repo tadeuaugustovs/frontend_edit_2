@@ -37,17 +37,68 @@ export const editalService = {
     }
   },
 
-  async createEdital(formData: EditalFormData): Promise<EditalResponse> {
-    const payload = this.formatPayload(formData)
-    console.log('📝 Criando edital:', payload)
+  formatFormData(formData: EditalFormData): FormData {
+    const form = new FormData()
     
-    const edital = await apiClient.post<EditalResponse>('/api/editals/', payload)
-    console.log('✅ Edital criado:', edital)
+    // Campos básicos
+    form.append('title', formData.title)
+    form.append('description', formData.description)
+    form.append('status', formData.status)
+    
+    // Metadados como JSON
+    const metadata = formData.dynamicFields
+      .filter(field => field.key && field.value)
+      .map(field => ({
+        key: field.key,
+        value: field.value
+      }))
+    form.append('metadata', JSON.stringify(metadata))
+    
+    // Arquivo principal (PDF)
+    if (formData.mainPDF?.file) {
+      form.append('main_pdf', formData.mainPDF.file, formData.mainPDF.name)
+      form.append('main_pdf_display_name', formData.mainPDF.displayName)
+    }
+    
+    // Anexos
+    formData.annexes.forEach((annexe, index) => {
+      if (annexe.file) {
+        form.append(`annexe_${index}`, annexe.file, annexe.name)
+        form.append(`annexe_${index}_display_name`, annexe.displayName)
+      }
+    })
+    
+    // Resultados
+    formData.results.forEach((result, index) => {
+      if (result.file) {
+        form.append(`result_${index}`, result.file, result.name)
+        form.append(`result_${index}_display_name`, result.displayName)
+      }
+    })
+    
+    return form
+  },
 
-    // TODO: Implementar upload de arquivos quando necessário
-    // Por enquanto, apenas criamos o edital com referências aos arquivos
-
-    return edital
+  async createEdital(formData: EditalFormData): Promise<EditalResponse> {
+    console.log('📝 Criando edital com arquivos reais...')
+    
+    // Se há arquivos, usar FormData para upload real
+    if (formData.mainPDF?.file || formData.annexes.some(a => a.file) || formData.results.some(r => r.file)) {
+      const form = this.formatFormData(formData)
+      console.log('📎 Enviando FormData com arquivos binários')
+      
+      const edital = await apiClient.uploadFile('/api/editals/', form)
+      console.log('✅ Edital criado com arquivos:', edital)
+      return edital
+    } else {
+      // Fallback para JSON simples se não há arquivos
+      const payload = this.formatPayload(formData)
+      console.log('📝 Enviando JSON sem arquivos:', payload)
+      
+      const edital = await apiClient.post<EditalResponse>('/api/editals/', payload)
+      console.log('✅ Edital criado:', edital)
+      return edital
+    }
   },
 
   async updateEdital(id: string, formData: EditalFormData): Promise<EditalResponse> {

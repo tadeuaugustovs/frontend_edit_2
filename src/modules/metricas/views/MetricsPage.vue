@@ -218,21 +218,21 @@
               />
             </ChartWidget>
 
-            <!-- 6. Distribuição de Editais -->
+            <!-- 6. Taxa de Resolução da Edite (Substituindo Distribuição de Editais) -->
             <ChartWidget
-              id="edital-distribution"
-              title="Distribuição de Editais"
-              :icon="FileText"
+              id="ai-resolution-rate"
+              title="Taxa de Resolução da Edite"
+              :icon="Bot"
               :is-edit-mode="isEditMode"
-              :is-visible="widgetVisibility.editalDistribution"
-              :chart-type="chartTypes.editalDistribution"
-              @toggle-visibility="toggleWidgetVisibility('editalDistribution')"
-              @change-type="(type) => chartTypes.editalDistribution = type"
+              :is-visible="widgetVisibility.aiResolutionRate"
+              :chart-type="chartTypes.aiResolutionRate"
+              @toggle-visibility="toggleWidgetVisibility('aiResolutionRate')"
+              @change-type="(type) => chartTypes.aiResolutionRate = type"
             >
               <EChartsComponent
-                :labels="editalLabels.slice(0, 5)"
-                :data="messageData.slice(0, 5)"
-                :type="chartTypes.editalDistribution"
+                :labels="aiPerformanceLabels"
+                :data="aiPerformanceData"
+                :type="chartTypes.aiResolutionRate"
               />
             </ChartWidget>
           </div>
@@ -277,7 +277,7 @@ import {
   Hash,
   TrendingUp,
   Cpu,
-  PieChart
+  Bot
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -303,7 +303,7 @@ const chartTypes = ref({
   monthlyGrowth: 'area',
   usersByEdital: 'line',
   aiTokens: 'pie',
-  editalDistribution: 'pie'
+  aiResolutionRate: 'donut' // Novo gráfico focado na performance da IA
 })
 
 // Visibilidade dos widgets
@@ -313,7 +313,7 @@ const widgetVisibility = ref({
   monthlyGrowth: true,
   usersByEdital: true,
   aiTokens: true,
-  editalDistribution: true
+  aiResolutionRate: true // Novo widget de performance da IA
 })
 
 // Computed properties para dados dos gráficos
@@ -370,6 +370,21 @@ const monthlyData = computed(() => {
     return [89, 134, 178, 223, 267, 312, 356, 398, 445, 489, 534, 578]
   }
   return metrics.value.monthly_growth.map(m => m.messages)
+})
+
+// Dados para o novo gráfico de performance da IA
+const aiPerformanceLabels = computed(() => {
+  return ['Resolvidas pela IA', 'Transferidas para Humano']
+})
+
+const aiPerformanceData = computed(() => {
+  if (!metrics.value?.ai_performance) {
+    return [87.3, 12.7] // Dados padrão baseados no PDF
+  }
+  return [
+    metrics.value.ai_performance.resolution_rate,
+    metrics.value.ai_performance.human_handoff_rate
+  ]
 })
 
 // Funções

@@ -33,7 +33,7 @@
 
       <!-- Chat Messages -->
       <div v-else class="flex-1 overflow-hidden">
-        <div ref="messagesContainer" class="h-full overflow-y-auto p-4 bg-gray-50 rounded-lg">
+        <div ref="messagesContainer" class="h-full overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div class="space-y-4">
             <div
               v-for="message in session.messages"
@@ -112,7 +112,7 @@ const messageClasses = (role: 'user' | 'bot') => {
   if (role === 'user') {
     return 'bg-blue-500 text-white'
   }
-  return 'bg-white border border-gray-200 text-gray-900'
+  return 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100'
 }
 
 const formatDate = (timestamp: string): string => {

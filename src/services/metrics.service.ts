@@ -24,6 +24,12 @@ export interface EngagementMetrics {
     monthly_cost: number
     requests_count: number
   }
+  ai_performance: {
+    resolution_rate: number
+    satisfaction_score: number
+    human_handoff_rate: number
+    response_accuracy: number
+  }
 }
 
 export interface Message {
@@ -94,6 +100,12 @@ export const metricsService = {
           total_tokens: 1847293,
           monthly_cost: 347.89,
           requests_count: 11847
+        },
+        ai_performance: {
+          resolution_rate: 87.3, // 87.3% das perguntas são resolvidas pela IA
+          satisfaction_score: 4.2, // Nota média de satisfação (1-5)
+          human_handoff_rate: 12.7, // 12.7% precisam de intervenção humana
+          response_accuracy: 91.5 // 91.5% de precisão nas respostas
         }
       }
     }
