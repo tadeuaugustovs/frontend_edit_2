@@ -6,7 +6,7 @@
     
     <!-- Modal Content -->
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl">
+      <div class="relative w-full max-w-6xl bg-white rounded-xl shadow-2xl max-h-[90vh] overflow-hidden">
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <div class="flex items-center gap-3">
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Tab Content -->
-        <div class="p-6">
+        <div class="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
           <!-- Visão A: Rotinas Ativas -->
           <div v-if="activeTab === 'routines'" class="space-y-4">
             <div class="flex items-center justify-between">
@@ -140,106 +140,179 @@
             </h3>
 
             <form @submit.prevent="saveRoutine" class="space-y-6">
-              <!-- Nome da Rotina -->
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Nome da Rotina</label>
-                <input
-                  v-model="routineForm.name"
-                  type="text"
-                  placeholder="Ex: Relatório Diretoria"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-
-              <!-- Destinatários (Tags/Chips) -->
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Destinatários</label>
-                <div class="border border-gray-300 rounded-lg p-3 min-h-[100px] focus-within:ring-2 focus-within:ring-blue-500">
-                  <!-- Tags dos emails -->
-                  <div class="flex flex-wrap gap-2 mb-2">
-                    <span 
-                      v-for="(email, index) in routineForm.recipients" 
-                      :key="index"
-                      class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                    >
-                      {{ email }}
-                      <button type="button" @click="removeRecipient(index)" class="hover:text-blue-900">
-                        <X class="h-3 w-3" />
-                      </button>
-                    </span>
+              <!-- Layout em 2 Colunas -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Coluna Esquerda: Campos de Configuração -->
+                <div class="space-y-6">
+                  <!-- Nome da Rotina -->
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Nome da Rotina</label>
+                    <input
+                      v-model="routineForm.name"
+                      type="text"
+                      placeholder="Ex: Relatório Diretoria"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
                   </div>
-                  <!-- Input para novo email -->
-                  <input
-                    v-model="newRecipient"
-                    @keydown.enter.prevent="addRecipient"
-                    type="email"
-                    placeholder="Digite um e-mail e pressione Enter"
-                    class="w-full border-0 outline-0 text-sm"
-                  />
+
+                  <!-- Destinatários (Tags/Chips) -->
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Destinatários</label>
+                    <div class="border border-gray-300 rounded-lg p-3 min-h-[120px] focus-within:ring-2 focus-within:ring-blue-500">
+                      <!-- Tags dos emails -->
+                      <div class="flex flex-wrap gap-2 mb-2">
+                        <span 
+                          v-for="(email, index) in routineForm.recipients" 
+                          :key="index"
+                          class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                        >
+                          {{ email }}
+                          <button type="button" @click="removeRecipient(index)" class="hover:text-blue-900">
+                            <X class="h-3 w-3" />
+                          </button>
+                        </span>
+                      </div>
+                      <!-- Input para novo email -->
+                      <input
+                        v-model="newRecipient"
+                        @keydown.enter.prevent="addRecipient"
+                        type="email"
+                        placeholder="Digite um e-mail e pressione Enter"
+                        class="w-full border-0 outline-0 text-sm"
+                      />
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Digite um e-mail e pressione Enter para adicionar</p>
+                  </div>
+
+                  <!-- Frequência -->
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Frequência de Envio</label>
+                    <select
+                      v-model="routineForm.frequency"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Selecione a frequência</option>
+                      <option value="daily">Diário</option>
+                      <option value="weekly">Semanal</option>
+                      <option value="biweekly">Quinzenal (a cada 15 dias)</option>
+                      <option value="monthly">Mensal</option>
+                      <option value="custom">Personalizado (Cron)</option>
+                    </select>
+                  </div>
+
+                  <!-- Cron personalizado (se selecionado) -->
+                  <div v-if="routineForm.frequency === 'custom'">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Expressão Cron</label>
+                    <input
+                      v-model="routineForm.cronExpression"
+                      type="text"
+                      placeholder="0 9 * * 1 (toda segunda às 9h)"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p class="text-xs text-slate-500 mt-1">
+                      Exemplo: "0 9 * * 1" = toda segunda-feira às 9h
+                    </p>
+                  </div>
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Digite um e-mail e pressione Enter para adicionar</p>
-              </div>
 
-              <!-- Frequência -->
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Frequência de Envio</label>
-                <select
-                  v-model="routineForm.frequency"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Selecione a frequência</option>
-                  <option value="daily">Diário</option>
-                  <option value="weekly">Semanal</option>
-                  <option value="biweekly">Quinzenal (a cada 15 dias)</option>
-                  <option value="monthly">Mensal</option>
-                  <option value="custom">Personalizado (Cron)</option>
-                </select>
-              </div>
+                <!-- Coluna Direita: Conteúdo e Email -->
+                <div class="space-y-6">
+                  <!-- Conteúdo do PDF - Granularidade Detalhada -->
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-3">Conteúdo do Relatório</label>
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto">
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeCover"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">Capa Executiva & Resumo</span>
+                          <p class="text-xs text-slate-500">Título, Data, Logos da FAPES e resumo executivo</p>
+                        </div>
+                      </label>
+                      
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeKpis"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">KPIs Gerais</span>
+                          <p class="text-xs text-slate-500">Cards de totais (Mensagens, Usuários, Média, Custo)</p>
+                        </div>
+                      </label>
+                      
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeBusinessCharts"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">Gráficos de Negócio</span>
+                          <p class="text-xs text-slate-500">Perguntas por Edital, Top Termos, Crescimento Mensal</p>
+                        </div>
+                      </label>
+                      
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeFinancialMetrics"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">Métricas Financeiras</span>
+                          <p class="text-xs text-slate-500">Evolução de Custos, ROI, Análise de Investimento</p>
+                        </div>
+                      </label>
+                      
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeTechnicalPerformance"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">Performance Técnica IA</span>
+                          <p class="text-xs text-slate-500">Tokens, Latência, Disponibilidade, Métricas de Qualidade</p>
+                        </div>
+                      </label>
+                      
+                      <label class="flex items-start gap-3">
+                        <input
+                          v-model="routineForm.includeEditalsList"
+                          type="checkbox"
+                          class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span class="text-sm font-medium text-slate-700">Listagem de Editais Ativos</span>
+                          <p class="text-xs text-slate-500">Tabela simples com todos os editais e seus status</p>
+                        </div>
+                      </label>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">
+                      <strong>Dica:</strong> A Capa Executiva é recomendada para relatórios direcionais à diretoria
+                    </p>
+                  </div>
 
-              <!-- Cron personalizado (se selecionado) -->
-              <div v-if="routineForm.frequency === 'custom'">
-                <label class="block text-sm font-medium text-slate-700 mb-2">Expressão Cron</label>
-                <input
-                  v-model="routineForm.cronExpression"
-                  type="text"
-                  placeholder="0 9 * * 1 (toda segunda às 9h)"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-                <p class="text-xs text-slate-500 mt-1">
-                  Exemplo: "0 9 * * 1" = toda segunda-feira às 9h
-                </p>
-              </div>
-
-              <!-- Conteúdo do PDF -->
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-3">Conteúdo do Relatório</label>
-                <div class="space-y-3">
-                  <label class="flex items-center gap-3">
-                    <input
-                      v-model="routineForm.includeKpis"
-                      type="checkbox"
-                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span class="text-sm text-slate-700">KPIs (Mensagens, Usuários, Média, Custo)</span>
-                  </label>
-                  <label class="flex items-center gap-3">
-                    <input
-                      v-model="routineForm.includeCharts"
-                      type="checkbox"
-                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span class="text-sm text-slate-700">Gráficos de Editais</span>
-                  </label>
-                  <label class="flex items-center gap-3">
-                    <input
-                      v-model="routineForm.includeAiMetrics"
-                      type="checkbox"
-                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span class="text-sm text-slate-700">Métricas de IA (Tokens, Custos)</span>
-                  </label>
+                  <!-- Mensagem do E-mail (Template Executivo) -->
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Mensagem do E-mail</label>
+                    <textarea
+                      v-model="routineForm.emailMessage"
+                      rows="8"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                      placeholder="Corpo da mensagem do e-mail..."
+                    ></textarea>
+                    <p class="text-xs text-slate-500 mt-1">
+                      Esta mensagem será enviada junto com o relatório em anexo
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -319,9 +392,22 @@ const routineForm = reactive({
   recipients: [],
   frequency: '',
   cronExpression: '',
+  emailMessage: `Prezados,
+
+Segue em anexo o Relatório de Gestão Integrada da FAPES, contendo os indicadores de performance dos editais e métricas de eficiência da IA referentes ao último período.
+
+Destaques:
+- Volume de atendimentos processados
+- Análise de custos operacionais
+
+Atenciosamente,
+Sistema de Gestão Inteligente`,
+  includeCover: true,
   includeKpis: true,
-  includeCharts: true,
-  includeAiMetrics: true
+  includeBusinessCharts: true,
+  includeFinancialMetrics: false,
+  includeTechnicalPerformance: true,
+  includeEditalsList: false
 })
 
 // Funções
@@ -343,9 +429,22 @@ const resetForm = () => {
     recipients: [],
     frequency: '',
     cronExpression: '',
+    emailMessage: `Prezados,
+
+Segue em anexo o Relatório de Gestão Integrada da FAPES, contendo os indicadores de performance dos editais e métricas de eficiência da IA referentes ao último período.
+
+Destaques:
+- Volume de atendimentos processados
+- Análise de custos operacionais
+
+Atenciosamente,
+Sistema de Gestão Inteligente`,
+    includeCover: true,
     includeKpis: true,
-    includeCharts: true,
-    includeAiMetrics: true
+    includeBusinessCharts: true,
+    includeFinancialMetrics: false,
+    includeTechnicalPerformance: true,
+    includeEditalsList: false
   })
 }
 
