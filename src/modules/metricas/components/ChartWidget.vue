@@ -48,8 +48,8 @@
     <div class="p-6">
       <!-- Título (só aparece quando NÃO está no modo de edição) -->
       <div v-if="!isEditMode" class="flex items-center gap-2 mb-4">
-        <component :is="icon" class="h-5 w-5 text-blue-600" />
-        <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+        <component :is="icon" class="h-5 w-5 text-slate-600" />
+        <h3 class="text-lg font-semibold text-slate-800">{{ title }}</h3>
       </div>
 
       <!-- Área do Gráfico -->

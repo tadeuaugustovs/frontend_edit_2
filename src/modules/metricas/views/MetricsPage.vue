@@ -55,9 +55,9 @@
               <Settings class="h-4 w-4" />
               {{ isEditMode ? 'Finalizar Edição' : 'Configurar Dashboard' }}
             </Button>
-            <Button variant="outline" size="sm" @click="showEmailModal = true" class="gap-2">
-              <Mail class="h-4 w-4" />
-              Relatório Email
+            <Button variant="outline" size="sm" @click="openReportsCenter" class="gap-2">
+              <Reports class="h-4 w-4" />
+              Central de Relatórios
             </Button>
           </div>
         </div>
@@ -75,61 +75,53 @@
 
         <!-- Conteúdo das Métricas -->
         <div v-else>
-          <!-- Cards de Resumo (KPIs) -->
+          <!-- Cards de Resumo (KPIs) - Estilo Corporativo -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total de Mensagens -->
-            <div class="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-300">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-600 mb-1">Total de Mensagens</p>
-                  <p class="text-3xl font-bold text-blue-600">2.658</p>
-                  <p class="text-xs text-gray-500 mt-1">27 editais ativos</p>
+                  <p class="text-sm font-medium text-slate-600 mb-1">Total de Mensagens</p>
+                  <p class="text-3xl font-bold text-slate-800">{{ formatNumberFn(2658) }}</p>
+                  <p class="text-xs text-slate-500 mt-1">27 editais ativos</p>
                 </div>
-                <div class="p-3 bg-blue-500/10 rounded-lg">
-                  <MessageCircle class="h-8 w-8 text-blue-600" />
-                </div>
+                <FileText class="h-8 w-8 text-slate-600" />
               </div>
             </div>
 
             <!-- Total de Usuários -->
-            <div class="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-300">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-600 mb-1">Total de Usuários</p>
-                  <p class="text-3xl font-bold text-green-600">456</p>
-                  <p class="text-xs text-gray-500 mt-1">usuários únicos</p>
+                  <p class="text-sm font-medium text-slate-600 mb-1">Total de Usuários</p>
+                  <p class="text-3xl font-bold text-slate-800">{{ formatNumberFn(456) }}</p>
+                  <p class="text-xs text-slate-500 mt-1">usuários únicos</p>
                 </div>
-                <div class="p-3 bg-green-500/10 rounded-lg">
-                  <Users class="h-8 w-8 text-green-600" />
-                </div>
+                <Users class="h-8 w-8 text-slate-600" />
               </div>
             </div>
 
             <!-- Média por Conversa -->
-            <div class="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-300">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-600 mb-1">Média por Conversa</p>
-                  <p class="text-3xl font-bold text-purple-600">5.83</p>
-                  <p class="text-xs text-gray-500 mt-1">mensagens por sessão</p>
+                  <p class="text-sm font-medium text-slate-600 mb-1">Média por Conversa</p>
+                  <p class="text-3xl font-bold text-slate-800">5,83</p>
+                  <p class="text-xs text-slate-500 mt-1">mensagens por sessão</p>
                 </div>
-                <div class="p-3 bg-purple-500/10 rounded-lg">
-                  <BarChart3 class="h-8 w-8 text-purple-600" />
-                </div>
+                <Activity class="h-8 w-8 text-slate-600" />
               </div>
             </div>
 
-            <!-- Custo IA -->
-            <div class="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+            <!-- Custo IA (em Reais) -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-300">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-gray-600 mb-1">Custo IA (Mês)</p>
-                  <p class="text-3xl font-bold text-emerald-600">$347.89</p>
-                  <p class="text-xs text-gray-500 mt-1">11.8K requisições</p>
+                  <p class="text-sm font-medium text-slate-600 mb-1">Custo IA (Mês)</p>
+                  <p class="text-3xl font-bold text-slate-800">{{ formatCurrencyFn(convertUsdToBrlFn(347.89)) }}</p>
+                  <p class="text-xs text-slate-500 mt-1">{{ formatNumberFn(11800) }} requisições</p>
                 </div>
-                <div class="p-3 bg-emerald-500/10 rounded-lg">
-                  <DollarSign class="h-8 w-8 text-emerald-600" />
-                </div>
+                <Banknote class="h-8 w-8 text-slate-600" />
               </div>
             </div>
           </div>
@@ -230,7 +222,7 @@
             <ChartWidget
               id="edital-distribution"
               title="Distribuição de Editais"
-              :icon="PieChart"
+              :icon="FileText"
               :is-edit-mode="isEditMode"
               :is-visible="widgetVisibility.editalDistribution"
               :chart-type="chartTypes.editalDistribution"
@@ -247,6 +239,12 @@
         </div>
       </div>
     </main>
+
+    <!-- Central de Relatórios -->
+    <ReportsCenter 
+      :is-open="showReportsCenter" 
+      @close="showReportsCenter = false" 
+    />
   </div>
 </template>
 
@@ -256,23 +254,26 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { metricsService } from '@/services/metrics.service'
+import { formatCurrency, formatNumber, convertUsdToBrl } from '@/common/utils/currency'
 import Button from '@/common/components/ui/Button.vue'
 import Spinner from '@/common/components/ui/Spinner.vue'
 import EChartsComponent from '@/modules/metricas/components/EChartsComponent.vue'
 import ChartWidget from '@/modules/metricas/components/ChartWidget.vue'
+import ReportsCenter from '@/modules/metricas/components/ReportsCenter.vue'
 import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import { 
   ArrowLeft, 
   RefreshCw, 
   LogOut, 
-  MessageCircle, 
   Users, 
   BarChart3,
   Info,
   Trash2,
   Settings,
-  Mail,
-  DollarSign,
+  FileClockIcon as Reports,
+  FileText,
+  Activity,
+  Banknote,
   Hash,
   TrendingUp,
   Cpu,
@@ -286,7 +287,14 @@ const uiStore = useUiStore()
 const metrics = ref(null)
 const isLoading = ref(false)
 const isEditMode = ref(false)
-const showEmailModal = ref(false)
+const showReportsCenter = ref(false)
+
+// Funções de formatação
+const { formatCurrency: formatCurrencyFn, formatNumber: formatNumberFn, convertUsdToBrl: convertUsdToBrlFn } = {
+  formatCurrency,
+  formatNumber,
+  convertUsdToBrl
+}
 
 // Tipos de gráfico para cada widget
 const chartTypes = ref({
@@ -407,6 +415,10 @@ const toggleEditMode = () => {
 
 const toggleWidgetVisibility = (widgetId: string) => {
   widgetVisibility.value[widgetId] = !widgetVisibility.value[widgetId]
+}
+
+const openReportsCenter = () => {
+  showReportsCenter.value = true
 }
 
 const handleLogout = () => {
