@@ -40,7 +40,7 @@
           />
         </div>
 
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 p-8">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 p-8">
           <div v-if="currentStep === 0">
             <div class="flex items-center gap-2 mb-6">
               <FileText class="h-5 w-5 text-blue-600" />
@@ -54,7 +54,7 @@
                   v-model="formData.title"
                   type="text"
                   placeholder="Ex: Edital FAPES 001/2025"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   :class="{ 'border-red-500': errors.title }"
                 />
                 <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title }}</p>
@@ -66,7 +66,7 @@
                   v-model="formData.description"
                   rows="6"
                   placeholder="Descreva o objetivo do edital..."
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   :class="{ 'border-red-500': errors.description }"
                 ></textarea>
                 <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
@@ -76,7 +76,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Status *</label>
                 <select
                   v-model="formData.status"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="open">Aberto</option>
                   <option value="closed">Fechado</option>
@@ -101,13 +101,13 @@
                       v-model="field.key"
                       type="text"
                       placeholder="Nome do campo"
-                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <input
                       v-model="field.value"
                       type="text"
                       placeholder="Valor"
-                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <button @click="removeDynamicField(index)" class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                       <Trash2 class="h-5 w-5" />
@@ -138,7 +138,7 @@
               <Upload class="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-slate-500" />
               <p class="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">Arraste arquivos PDF aqui</p>
               <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">ou clique no botão abaixo</p>
-              <Button @click="$refs.fileInput.click()" class="gap-2">
+              <Button @click="triggerFileInput" class="gap-2">
                 <FileText class="h-4 w-4" />
                 Selecionar Arquivos
               </Button>
@@ -228,19 +228,7 @@
       </div>
     </div>
 
-    <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click="showSuccessModal = false">
-      <div @click.stop class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle class="h-8 w-8 text-green-600" />
-        </div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-2">Sucesso!</h3>
-        <p class="text-gray-600 dark:text-slate-400 mb-6">Edital criado com sucesso.</p>
-        <div class="flex gap-3">
-          <Button variant="outline" @click="createAnother" class="flex-1">Criar Outro</Button>
-          <Button @click="goToHome" class="flex-1">Ver Editais</Button>
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -253,7 +241,7 @@ import { editalService } from '@/modules/gestao-editais/services/edital.service'
 import Button from '@/common/components/ui/Button.vue'
 import StepIndicator from '@/modules/gestao-editais/components/StepIndicator.vue'
 import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
-import { ArrowLeft, ArrowRight, FileText, Upload, Trash2, Plus, Send, CheckCircle, LogOut } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, FileText, Upload, Trash2, Plus, Send, LogOut } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -268,7 +256,6 @@ const steps = [
 const currentStep = ref(0)
 const isDragging = ref(false)
 const isSubmitting = ref(false)
-const showSuccessModal = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const formData = ref({
@@ -312,6 +299,10 @@ const removeDynamicField = (index: number) => {
   formData.value.dynamicFields.splice(index, 1)
 }
 
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) addFiles(Array.from(target.files))
@@ -345,17 +336,36 @@ const formatFileSize = (bytes: number) => {
 const submitEdital = async () => {
   isSubmitting.value = true
   try {
+    // Construct UploadedFile objects from raw Files
+    const mainFile = uploadedFiles.value[0]
+    const mainPDFObject = mainFile ? {
+      id: 'temp-main',
+      name: mainFile.name,
+      displayName: mainFile.name,
+      file: mainFile
+    } : null
+
+    const annexesObjects = uploadedFiles.value.slice(1).map((file, index) => ({
+      id: `temp-annexe-${index}`,
+      name: file.name,
+      displayName: file.name,
+      file: file
+    }))
+
     await editalService.createEdital({
       title: formData.value.title,
       description: formData.value.description,
-      status: formData.value.status,
-      dynamicFields: formData.value.dynamicFields.filter(f => f.key && f.value),
-      mainPDF: uploadedFiles.value[0] || null,
-      annexes: uploadedFiles.value.slice(1),
+      status: formData.value.status as 'open' | 'closed' | 'analyzing', // Ensure type safety
+      dynamicFields: formData.value.dynamicFields.filter(f => f.key && f.value).map((f, i) => ({ ...f, id: `temp-field-${i}` })), // Add required ID
+      mainPDF: mainPDFObject,
+      annexes: annexesObjects,
       results: [],
     })
-    showSuccessModal.value = true
+    
+    uiStore.showToast({ type: 'success', message: 'Edital enviado com sucesso!' })
+    router.push('/')
   } catch (error) {
+    console.error('Erro ao criar edital:', error)
     uiStore.showToast({ type: 'error', message: 'Erro ao criar edital' })
   } finally {
     isSubmitting.value = false
@@ -365,15 +375,6 @@ const submitEdital = async () => {
 const handleCancel = () => {
   router.push('/')
 }
-
-const createAnother = () => {
-  showSuccessModal.value = false
-  currentStep.value = 0
-  formData.value = { title: '', description: '', status: 'open', dynamicFields: [] }
-  uploadedFiles.value = []
-}
-
-const goToHome = () => router.push('/')
 
 const handleLogout = () => {
   authStore.logout()

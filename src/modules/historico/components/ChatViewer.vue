@@ -1,5 +1,5 @@
 <template>
-  <Card class="h-full flex flex-col">
+  <Card class="h-full flex flex-col bg-white dark:bg-gray-900">
     <CardHeader class="flex-shrink-0">
       <div class="flex items-center justify-between">
         <div>
