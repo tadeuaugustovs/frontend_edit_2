@@ -384,8 +384,46 @@
           </div>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+
+
+    <!-- Modal Footer -->
+    <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+       <!-- Delete Section -->
+       <div>
+          <!-- Initial Button -->
+          <Button 
+             v-if="!showDeleteConfirm && !isEditModeInline"
+             variant="ghost" 
+             @click="confirmDelete"
+             class="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-500 dark:hover:bg-red-900/20"
+          >
+            <Trash2 class="h-4 w-4 mr-2" />
+            Excluir
+          </Button>
+
+          <!-- Confirmation UI -->
+          <div v-else-if="showDeleteConfirm" class="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-200">
+             <span class="text-sm font-medium text-red-700 dark:text-red-400">Tem certeza?</span>
+             <Button 
+               variant="outline" 
+               size="sm"
+               @click="cancelDelete"
+               class="h-8 px-3 text-xs"
+             >
+               Cancelar
+             </Button>
+             <Button 
+               size="sm"
+               @click="executeDelete"
+               class="h-8 px-3 text-xs bg-red-600 hover:bg-red-700 text-white border-none"
+             >
+               Sim, Excluir
+             </Button>
+          </div>
+       </div>
+
+       <!-- Action Buttons -->
+       <div class="flex gap-3">
           <Button variant="outline" @click="closeEditalModal">
             Fechar
           </Button>
@@ -408,7 +446,8 @@
             <Save class="h-4 w-4" />
             Salvar
           </Button>
-        </div>
+       </div>
+    </div>
       </div>
     </div>
   </div>
@@ -442,7 +481,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Save
+  Save,
+  Trash2
 } from 'lucide-vue-next'
 
 // Local Interface
@@ -639,9 +679,33 @@ const saveEditalInline = async () => {
 
   } catch (error) {
     console.error('Erro ao salvar:', error)
-    uiStore.showToast({ type: 'error', message: 'Erro ao salvar alterações' })
   } finally {
     isSaving.value = false
+  }
+}
+
+// Inline Edit State
+const showDeleteConfirm = ref(false)
+
+const confirmDelete = () => {
+  showDeleteConfirm.value = true
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+}
+
+const executeDelete = async () => {
+  if (!selectedEdital.value) return
+  
+  try {
+    await editalService.deleteEdital(selectedEdital.value.id)
+    uiStore.showToast({ type: 'success', message: 'Edital excluído com sucesso' })
+    closeEditalModal()
+    await loadEditais() // Refresh list
+  } catch (error) {
+    console.error('Erro ao excluir:', error)
+    uiStore.showToast({ type: 'error', message: 'Erro ao excluir edital' })
   }
 }
 
