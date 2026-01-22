@@ -1,19 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-      <div class="container mx-auto px-4 py-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+    <!-- Header with Glassmorphism -->
+    <header class="glass-header sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200/50 shadow-sm">
+      <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" @click="router.push('/')">
-              ← Voltar
+            <Button variant="ghost" size="sm" @click="router.push('/')" class="gap-2">
+              <ArrowLeft class="h-4 w-4" />
+              Voltar
             </Button>
-            <h1 class="text-2xl font-bold text-gray-900">Histórico de Conversas</h1>
+            <div class="border-l border-gray-300 pl-4">
+              <h1 class="text-xl font-semibold text-gray-900">Histórico de Conversas</h1>
+              <p class="text-xs text-gray-500">Visualize e gerencie conversas do chatbot</p>
+            </div>
           </div>
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3">
             <AccessibilityMenu />
-            <span class="text-sm text-gray-600">{{ authStore.user?.name }}</span>
-            <Button variant="outline" size="sm" @click="handleLogout">
+            <span class="text-sm text-gray-600 font-medium">{{ authStore.user?.name || 'admin' }}</span>
+            <Button variant="outline" size="sm" @click="handleLogout" class="gap-2">
+              <LogOut class="h-4 w-4" />
               Sair
             </Button>
           </div>
@@ -22,14 +27,17 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-6 py-8">
       <div class="max-w-7xl mx-auto space-y-6">
         <!-- Info Alert -->
-        <Alert>
-          <p class="text-sm">
-            <strong>Dica:</strong> Use a busca para filtrar sessões por email ou ID de usuário. Clique em uma sessão para visualizar a conversa completa.
-          </p>
-        </Alert>
+        <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-4">
+          <div class="flex items-center gap-2">
+            <Info class="h-4 w-4 text-blue-600" />
+            <p class="text-sm text-gray-600">
+              <strong>Dica:</strong> Use a busca para filtrar sessões por email ou ID de usuário. Clique em uma sessão para visualizar a conversa completa.
+            </p>
+          </div>
+        </div>
 
         <!-- Clear Selection Button -->
         <div v-if="selectedSessionId" class="flex justify-end">
@@ -71,10 +79,10 @@ import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { useConversas } from '@/common/composables/useConversas'
 import Button from '@/common/components/ui/Button.vue'
-import Alert from '@/common/components/ui/Alert.vue'
 import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import SessionsList from '@/modules/historico/components/SessionsList.vue'
 import ChatViewer from '@/modules/historico/components/ChatViewer.vue'
+import { ArrowLeft, LogOut, Info } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
