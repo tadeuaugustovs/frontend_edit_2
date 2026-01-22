@@ -4,13 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:5173"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - .:/app
-      - /app/node_modules
-    restart: unless-stopped
+      - "3000:80"
+    restart: always
     networks:
       - edital-network
 

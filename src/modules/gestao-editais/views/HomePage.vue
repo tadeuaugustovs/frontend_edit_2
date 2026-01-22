@@ -191,11 +191,7 @@
                 <div class="flex gap-2 ml-4">
                   <Button variant="ghost" size="sm" @click.stop="openEditalModal(edital)" class="gap-1.5">
                     <Eye class="h-4 w-4" />
-                    Ver
-                  </Button>
-                  <Button variant="ghost" size="sm" @click.stop="editEdital(edital.id)" class="gap-1.5">
-                    <Edit class="h-4 w-4" />
-                    Editar
+                    Ver Detalhes
                   </Button>
                 </div>
               </div>
@@ -282,246 +278,136 @@
           </button>
         </div>
 
-        <!-- Modal Content - Simplificado sem Preview -->
-        <div class="flex-1 overflow-y-auto">
-          <div class="p-6 space-y-6">
-            <!-- View Mode - Ficha Técnica -->
-            <div v-if="!isEditMode">
-              <!-- Título e Status -->
-              <div class="mb-6">
-                <div class="flex items-center gap-3 mb-2">
-                  <h2 class="text-2xl font-bold text-gray-900">{{ selectedEdital.title }}</h2>
-                  <Badge :variant="getStatusVariant(selectedEdital.status)">
-                    {{ getStatusLabel(selectedEdital.status) }}
-                  </Badge>
+        <!-- Modal Content - Professional & Clean Design -->
+        <div class="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+          <div class="p-6 space-y-8">
+            <!-- Header Section -->
+            <div class="space-y-4">
+              <div class="flex items-start justify-between">
+                <div class="space-y-1">
+                  <!-- Title Edit -->
+                  <div v-if="isEditModeInline">
+                    <input 
+                      v-model="editForm.title"
+                      type="text" 
+                      class="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none w-full"
+                    >
+                  </div>
+                  <h2 v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ selectedEdital.title }}</h2>
+                  
+                  <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center gap-1.5">
+                      <Calendar class="h-4 w-4" />
+                      Criado em {{ formatDate(selectedEdital.created_at) }}
+                    </span>
+                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span class="font-mono text-xs">ID: {{ selectedEdital.id }}</span>
+                  </div>
                 </div>
-                <p class="text-sm text-gray-500">
-                  Criado em {{ formatDate(selectedEdital.created_at) }}
+
+                <!-- Status Edit -->
+                <div v-if="isEditModeInline">
+                   <select
+                      v-model="editForm.status"
+                      class="px-3 py-1 border border-gray-300 rounded-lg text-sm"
+                    >
+                      <option value="open">Aberto</option>
+                      <option value="closed">Fechado</option>
+                      <option value="analyzing">Em Análise</option>
+                      <option value="draft">Rascunho</option>
+                    </select>
+                </div>
+                <Badge v-else :variant="getStatusVariant(selectedEdital.status)" size="lg">
+                  {{ getStatusLabel(selectedEdital.status) }}
+                </Badge>
+              </div>
+
+              <!-- Description Bloc -->
+              <div v-if="isEditModeInline">
+                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
+                   <textarea
+                     v-model="editForm.description"
+                     rows="6"
+                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                   ></textarea>
+              </div>
+              <div v-else class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-800">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+                  {{ selectedEdital.description }}
                 </p>
-              </div>
-
-              <!-- Descrição Completa -->
-              <div class="mb-6">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Descrição</h3>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedEdital.description }}</p>
-                </div>
-              </div>
-
-              <!-- Estatísticas Rápidas -->
-              <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-blue-50 rounded-lg p-4 text-center">
-                  <div class="flex items-center justify-center gap-2 mb-2">
-                    <FileText class="h-5 w-5 text-blue-600" />
-                    <span class="text-sm font-medium text-blue-900">Metadados</span>
-                  </div>
-                  <p class="text-2xl font-bold text-blue-600">{{ selectedEdital.metadata_count || 0 }}</p>
-                </div>
-                <div class="bg-green-50 rounded-lg p-4 text-center">
-                  <div class="flex items-center justify-center gap-2 mb-2">
-                    <Paperclip class="h-5 w-5 text-green-600" />
-                    <span class="text-sm font-medium text-green-900">Arquivos</span>
-                  </div>
-                  <p class="text-2xl font-bold text-green-600">{{ selectedEdital.files_count || 0 }}</p>
-                </div>
-                <div class="bg-purple-50 rounded-lg p-4 text-center">
-                  <div class="flex items-center justify-center gap-2 mb-2">
-                    <Calendar class="h-5 w-5 text-purple-600" />
-                    <span class="text-sm font-medium text-purple-900">Status</span>
-                  </div>
-                  <p class="text-sm font-semibold text-purple-600">{{ getStatusLabel(selectedEdital.status) }}</p>
-                </div>
-              </div>
-
-              <!-- Metadados Detalhados -->
-              <div v-if="selectedEdital.metadata && selectedEdital.metadata.length > 0" class="mb-6">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Metadados do Edital</h3>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                  <div class="space-y-3">
-                    <div
-                      v-for="meta in selectedEdital.metadata"
-                      :key="meta.id"
-                      class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-0"
-                    >
-                      <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ meta.key }}</span>
-                      <span class="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-700 px-2 py-1 rounded">{{ meta.value }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Informações Técnicas -->
-              <div class="mb-6">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Informações Técnicas</h3>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                      <span class="text-gray-600 dark:text-gray-400">ID do Edital</span>
-                      <span class="font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ selectedEdital.id }}</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                      <span class="text-gray-600 dark:text-gray-400">Data de Criação</span>
-                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatDate(selectedEdital.created_at) }}</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-                      <span class="text-gray-600 dark:text-gray-400">Última Atualização</span>
-                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatDate(selectedEdital.updated_at) }}</span>
-                    </div>
-                    <div class="flex justify-between py-2">
-                      <span class="text-gray-600 dark:text-gray-400">Total de Arquivos</span>
-                      <span class="font-medium text-gray-900 dark:text-gray-100">{{ selectedEdital.files_count || 0 }} arquivo(s)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Lista de Arquivos (sem preview) -->
-              <div v-if="selectedEdital.files && selectedEdital.files.length > 0" class="mb-6">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Paperclip class="h-4 w-4" />
-                  Arquivos Anexados ({{ selectedEdital.files.length }})
-                </h3>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                  <div class="space-y-2">
-                    <div
-                      v-for="file in selectedEdital.files"
-                      :key="file.id"
-                      class="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
-                    >
-                      <div class="flex items-center gap-3">
-                        <div class="p-2 bg-blue-100 rounded">
-                          <FileText class="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ file.name }}</p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">{{ getFileTypeLabel(file.file_type) }}</p>
-                        </div>
-                      </div>
-                      <a
-                        v-if="file.url"
-                        :href="file.url"
-                        target="_blank"
-                        class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <ExternalLink class="h-3 w-3" />
-                        Abrir
-                      </a>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <!-- Edit Mode -->
-            <div v-else class="space-y-4">
-              <!-- Title -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Título</label>
-                <input
-                  v-model="editForm.title"
-                  type="text"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Título do edital"
-                />
-              </div>
-
-              <!-- Description -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
-                <textarea
-                  v-model="editForm.description"
-                  rows="4"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Descrição do edital"
-                ></textarea>
-              </div>
-
-              <!-- Status -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select
-                  v-model="editForm.status"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            <!-- Files Section (Clean List, Full Width) -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
+                <Paperclip class="h-4 w-4" />
+                Arquivos do Edital
+              </h3>
+              
+              <div v-if="selectedEdital.files && selectedEdital.files.length > 0" class="space-y-2">
+                <div 
+                  v-for="file in selectedEdital.files" 
+                  :key="file.id"
+                  class="group flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all"
                 >
-                  <option value="open">Aberto</option>
-                  <option value="closed">Fechado</option>
-                  <option value="analyzing">Em Análise</option>
-                  <option value="draft">Rascunho</option>
-                </select>
-              </div>
-
-              <!-- Metadata Fields -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Metadados</label>
-                <div class="space-y-2">
-                  <div
-                    v-for="(meta, index) in editForm.metadata"
-                    :key="index"
-                    class="flex gap-2"
-                  >
-                    <input
-                      v-model="meta.key"
-                      type="text"
-                      placeholder="Chave"
-                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                    <input
-                      v-model="meta.value"
-                      type="text"
-                      placeholder="Valor"
-                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                    <button
-                      @click="removeMetadata(index)"
-                      class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 class="h-4 w-4" />
-                    </button>
+                  <div class="flex items-center gap-3">
+                    <div class="p-2 bg-gray-100 dark:bg-gray-800 rounded group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
+                      <FileText class="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                        {{ file.name }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ getFileTypeLabel(file.file_type) }}
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    @click="addMetadata"
-                    class="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                  
+                  <a 
+                    v-if="file.url"
+                    :href="file.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all shadow-sm"
                   >
-                    + Adicionar Metadado
-                  </button>
+                    <ExternalLink class="h-3 w-3" />
+                    Visualizar
+                  </a>
                 </div>
               </div>
-
-              <!-- Save Status -->
-              <div v-if="isSaving" class="flex items-center gap-2 text-sm text-blue-600">
-                <Spinner class="h-4 w-4" />
-                Salvando alterações...
+              <div v-else class="text-sm text-gray-500 dark:text-gray-400 italic py-4">
+                Nenhum arquivo anexado a este edital.
               </div>
             </div>
           </div>
         </div>
 
         <!-- Modal Footer -->
-        <div class="flex items-center justify-between gap-3 p-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
-          <div>
-            <Button
-              v-if="isEditMode"
-              variant="outline"
-              @click="confirmDelete"
-              class="gap-2 text-red-600 border-red-300 hover:bg-red-50"
-            >
-              <Trash2 class="h-4 w-4" />
-              Deletar Edital
-            </Button>
-          </div>
-          <div class="flex gap-3">
-            <Button variant="outline" @click="cancelEdit">
-              {{ isEditMode ? 'Cancelar' : 'Fechar' }}
-            </Button>
-            <Button v-if="!isEditMode" @click="enterEditMode" class="gap-2">
-              <Edit class="h-4 w-4" />
-              Editar Edital
-            </Button>
-            <Button v-else @click="saveEdital" :disabled="isSaving" class="gap-2">
-              <Save class="h-4 w-4" />
-              Salvar Alterações
-            </Button>
-          </div>
+        <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <Button variant="outline" @click="closeEditalModal">
+            Fechar
+          </Button>
+          
+          <Button 
+            v-if="!isEditModeInline"
+            @click="enterEditMode" 
+            class="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+          >
+            <Edit class="h-4 w-4" />
+            Editar Edital
+          </Button>
+          
+          <Button 
+            v-else
+            @click="saveEditalInline" 
+            :loading="isSaving"
+            class="gap-2 bg-green-600 hover:bg-green-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+          >
+            <Save class="h-4 w-4" />
+            Salvar
+          </Button>
         </div>
       </div>
     </div>
@@ -534,6 +420,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { editalService } from '@/modules/gestao-editais/services/edital.service'
+import type { EditalResponse } from '@/modules/gestao-editais/types/edital.types'
+
 import Button from '@/common/components/ui/Button.vue'
 import Logo from '@/common/components/ui/Logo.vue'
 import Badge from '@/common/components/ui/Badge.vue'
@@ -553,39 +441,59 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Save,
-  Trash2,
-  ExternalLink
+  ExternalLink,
+  Save
 } from 'lucide-vue-next'
+
+// Local Interface
+interface Edital {
+  id: string
+  title: string
+  description: string
+  status: 'open' | 'closed' | 'analyzing' | 'draft'
+  created_at: string
+  updated_at: string
+  metadata_count: number
+  files_count: number
+  metadata: Array<{ id: string; key: string; value: string }>
+  files: Array<{ id: string; name: string; url: string; file_type: string }>
+}
 
 const router = useRouter()
 const authStore = useAuthStore()
 const uiStore = useUiStore()
 
-const editais = ref([])
+const editais = ref<Edital[]>([])
 const isLoadingEditais = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('')
-const selectedEdital = ref(null)
+const selectedEdital = ref<Edital | null>(null)
 const currentPage = ref(1)
 const itemsPerPage = 5
-const isEditMode = ref(false)
+
+// Inline Edit State
+const isEditModeInline = ref(false)
 const isSaving = ref(false)
 const editForm = ref({
   title: '',
   description: '',
-  status: '',
-  metadata: []
+  status: 'open',
+  metadata: [] as Array<{ id?: string; key: string; value: string }>
 })
 
 const navigateTo = (path: string) => {
   router.push(path)
 }
 
+const navigateToEdit = (id: string) => {
+  router.push(`/editais/${id}/editar`)
+}
+
 const loadEditais = async () => {
   isLoadingEditais.value = true
   try {
-    editais.value = await editalService.getEditals()
+    const response = await editalService.getEditals()
+    editais.value = response as any as Edital[]
   } catch (error) {
     console.error('Erro ao carregar editais:', error)
     uiStore.showToast({
@@ -598,23 +506,21 @@ const loadEditais = async () => {
 }
 
 const filteredEditais = computed(() => {
-  let filtered = editais.value
+  let result = editais.value
 
-  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(edital =>
-      edital.title.toLowerCase().includes(query) ||
-      edital.description.toLowerCase().includes(query)
+    result = result.filter(e => 
+      e.title.toLowerCase().includes(query) || 
+      e.description.toLowerCase().includes(query)
     )
   }
 
-  // Filter by status
   if (statusFilter.value) {
-    filtered = filtered.filter(edital => edital.status === statusFilter.value)
+    result = result.filter(e => e.status === statusFilter.value)
   }
 
-  return filtered
+  return result
 })
 
 const totalPages = computed(() => {
@@ -631,12 +537,6 @@ const endIndex = computed(() => {
 
 const paginatedEditais = computed(() => {
   return filteredEditais.value.slice(startIndex.value, endIndex.value)
-})
-
-const mainPdfUrl = computed(() => {
-  if (!selectedEdital.value?.files) return null
-  const mainPdf = selectedEdital.value.files.find(f => f.file_type === 'main_pdf')
-  return mainPdf?.url || null
 })
 
 const nextPage = () => {
@@ -659,10 +559,9 @@ const clearFilters = () => {
 
 const openEditalModal = async (edital: any) => {
   try {
-    // Fetch full edital details including files and metadata
     const fullEdital = await editalService.getEdital(edital.id)
-    selectedEdital.value = fullEdital
-    isEditMode.value = false
+    selectedEdital.value = fullEdital as any as Edital // Cast to local type
+    isEditModeInline.value = false // Reset mode
   } catch (error) {
     console.error('Erro ao carregar detalhes do edital:', error)
     uiStore.showToast({
@@ -674,110 +573,80 @@ const openEditalModal = async (edital: any) => {
 
 const closeEditalModal = () => {
   selectedEdital.value = null
-  isEditMode.value = false
-  editForm.value = {
-    title: '',
-    description: '',
-    status: '',
-    metadata: []
-  }
+  isEditModeInline.value = false
 }
 
+// Inline Edit Logic
 const enterEditMode = () => {
-  isEditMode.value = true
+  if (!selectedEdital.value) return
+  
   editForm.value = {
     title: selectedEdital.value.title,
     description: selectedEdital.value.description,
     status: selectedEdital.value.status,
-    metadata: selectedEdital.value.metadata?.map(m => ({ key: m.key, value: m.value })) || []
+    metadata: selectedEdital.value.metadata ? selectedEdital.value.metadata.map(m => ({ key: m.key, value: m.value })) : []
   }
+  isEditModeInline.value = true
 }
 
-const cancelEdit = () => {
-  if (isEditMode.value) {
-    isEditMode.value = false
-    editForm.value = {
-      title: '',
-      description: '',
-      status: '',
-      metadata: []
-    }
-  } else {
-    closeEditalModal()
-  }
-}
-
-const addMetadata = () => {
-  editForm.value.metadata.push({ key: '', value: '' })
-}
-
-const removeMetadata = (index: number) => {
-  editForm.value.metadata.splice(index, 1)
-}
-
-const saveEdital = async () => {
+const saveEditalInline = async () => {
+  if (!selectedEdital.value) return
+  
   isSaving.value = true
   try {
-    const formData = {
+    const payload = {
       title: editForm.value.title,
       description: editForm.value.description,
-      status: editForm.value.status,
-      dynamicFields: editForm.value.metadata.filter(m => m.key && m.value),
-      mainPDF: null,
-      annexes: [],
+      status: editForm.value.status as any,
+      dynamicFields: editForm.value.metadata.filter(m => m.key && m.value), // Assuming backend adapts this
+      // For minimal update, we might need to send everything or just changed fields depending on API
+      // Assuming create/update payload structure. 
+      // Important: `dynamicFields` mapping might differ from `metadata`. 
+      // Usually `dynamicFields` is what createEdital expects. 
       results: []
     }
 
-    await editalService.updateEdital(selectedEdital.value.id, formData)
+// ...
+    await editalService.updateEdital(selectedEdital.value.id, {
+        ...payload,
+        dynamicFields: editForm.value.metadata
+            .filter(m => m.key && m.value)
+            .map((m, i) => ({ ...m, id: m.id || `temp-inline-${i}` })), // Fix: Ensure ID exists
+        mainPDF: null, 
+        annexes: []
+    })
     
-    uiStore.showToast({
-      type: 'success',
-      message: 'Edital atualizado com sucesso'
-    })
+// ...
+    
+    // Update local data
+    selectedEdital.value.title = editForm.value.title
+    selectedEdital.value.description = editForm.value.description
+    selectedEdital.value.status = editForm.value.status as any
+    // Metadata update locally might be complex if IDs change, but for display:
+    // selectedEdital.value.metadata = ... (we would need response to get new IDs)
+    // Simpler: reload edital details
+    const refreshed = await editalService.getEdital(selectedEdital.value.id)
+    selectedEdital.value = refreshed as any as Edital
+    
+    // Also update list item locally to reflect changes immediately
+    const listIndex = editais.value.findIndex(e => e.id === selectedEdital.value?.id)
+    if (listIndex !== -1) {
+       editais.value[listIndex] = { ...editais.value[listIndex], ...editForm.value } as Edital
+    }
 
-    // Reload editais and close modal
-    await loadEditais()
-    closeEditalModal()
+    uiStore.showToast({ type: 'success', message: 'Edital atualizado com sucesso' })
+    isEditModeInline.value = false
+
   } catch (error) {
-    console.error('Erro ao salvar edital:', error)
-    uiStore.showToast({
-      type: 'error',
-      message: 'Erro ao salvar edital'
-    })
+    console.error('Erro ao salvar:', error)
+    uiStore.showToast({ type: 'error', message: 'Erro ao salvar alterações' })
   } finally {
     isSaving.value = false
   }
 }
 
-const confirmDelete = () => {
-  if (confirm(`Tem certeza que deseja deletar o edital "${selectedEdital.value.title}"? Esta ação não pode ser desfeita.`)) {
-    deleteEdital()
-  }
-}
-
-const deleteEdital = async () => {
-  try {
-    await editalService.deleteEdital(selectedEdital.value.id)
-    
-    uiStore.showToast({
-      type: 'success',
-      message: 'Edital deletado com sucesso'
-    })
-
-    // Reload editais and close modal
-    await loadEditais()
-    closeEditalModal()
-  } catch (error) {
-    console.error('Erro ao deletar edital:', error)
-    uiStore.showToast({
-      type: 'error',
-      message: 'Erro ao deletar edital'
-    })
-  }
-}
-
 const getStatusVariant = (status: string) => {
-  const variants = {
+  const variants: Record<string, string> = {
     open: 'success',
     closed: 'destructive',
     analyzing: 'warning',
@@ -787,7 +656,7 @@ const getStatusVariant = (status: string) => {
 }
 
 const getStatusLabel = (status: string) => {
-  const labels = {
+  const labels: Record<string, string> = {
     open: 'Aberto',
     closed: 'Fechado',
     analyzing: 'Em Análise',
@@ -797,7 +666,7 @@ const getStatusLabel = (status: string) => {
 }
 
 const getFileTypeLabel = (fileType: string) => {
-  const labels = {
+  const labels: Record<string, string> = {
     main_pdf: 'PDF Principal',
     annexe: 'Anexo',
     result: 'Resultado'
@@ -806,6 +675,7 @@ const getFileTypeLabel = (fileType: string) => {
 }
 
 const formatDate = (dateString: string) => {
+  if (!dateString) return '-'
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',

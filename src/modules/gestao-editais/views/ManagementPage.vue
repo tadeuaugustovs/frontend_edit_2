@@ -121,50 +121,57 @@
           <div v-if="currentStep === 1">
             <div class="flex items-center gap-2 mb-6">
               <Upload class="h-5 w-5 text-blue-600" />
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documentos</h2>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documento Principal</h2>
             </div>
 
+            <!-- State A: Upload Zone (No File) -->
             <div
+              v-if="uploadedFiles.length === 0"
               @drop.prevent="handleDrop"
               @dragover.prevent
               @dragenter="isDragging = true"
               @dragleave="isDragging = false"
               :class="[
-                'border-2 border-dashed rounded-xl p-8 text-center transition-all',
+                'border-2 border-dashed rounded-xl p-8 text-center transition-all h-96 flex flex-col items-center justify-center',
                 isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-slate-600'
               ]"
             >
-              <input ref="fileInput" type="file" accept=".pdf" multiple @change="handleFileSelect" class="hidden" />
+              <input ref="fileInput" type="file" accept=".pdf" @change="handleFileSelect" class="hidden" />
               <Upload class="h-12 w-12 mx-auto mb-4 text-gray-400 dark:text-slate-500" />
-              <p class="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">Arraste arquivos PDF aqui</p>
-              <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">ou clique no botão abaixo</p>
+              <p class="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">Arraste seu arquivo PDF aqui</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-6">Apenas arquivos PDF são permitidos</p>
               <Button @click="triggerFileInput" class="gap-2">
                 <FileText class="h-4 w-4" />
-                Selecionar Arquivos
+                Selecionar Arquivo
               </Button>
             </div>
 
-            <div v-if="uploadedFiles.length > 0" class="mt-6">
-              <h3 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
-                Arquivos ({{ uploadedFiles.length }})
-              </h3>
-              <div class="space-y-2">
-                <div
-                  v-for="(file, index) in uploadedFiles"
-                  :key="index"
-                  class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg"
-                >
-                  <div class="flex items-center gap-3">
-                    <FileText class="h-5 w-5 text-red-600" />
-                    <div>
-                      <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ file.name }}</p>
-                      <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatFileSize(file.size) }}</p>
-                    </div>
+            <!-- State B: Preview Mode (File Selected) -->
+            <div v-else class="space-y-4">
+              <div class="flex items-center justify-between bg-gray-50 dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                  <FileText class="h-5 w-5 text-blue-600" />
+                  <div>
+                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ uploadedFiles[0].name }}</p>
+                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatFileSize(uploadedFiles[0].size) }}</p>
                   </div>
-                  <button @click="removeFile(index)" class="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg">
-                    <Trash2 class="h-4 w-4 text-red-600" />
-                  </button>
                 </div>
+                <Button variant="outline" size="sm" @click="clearFile" class="gap-2 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20">
+                  <Trash2 class="h-4 w-4" />
+                  Trocar Arquivo
+                </Button>
+              </div>
+
+              <div class="relative w-full h-96 bg-gray-100 dark:bg-slate-900 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 shadow-inner">
+                 <iframe 
+                   v-if="previewUrl"
+                   :src="previewUrl" 
+                   class="w-full h-full"
+                   type="application/pdf"
+                 ></iframe>
+                 <div v-else class="flex items-center justify-center h-full text-gray-500">
+                   Carregando preview...
+                 </div>
               </div>
             </div>
           </div>
@@ -266,6 +273,7 @@ const formData = ref({
 })
 
 const uploadedFiles = ref<File[]>([])
+const previewUrl = ref<string | null>(null)
 const errors = ref({ title: '', description: '' })
 
 const nextStep = () => {
@@ -314,15 +322,25 @@ const handleDrop = (event: DragEvent) => {
 }
 
 const addFiles = (files: File[]) => {
-  const pdfFiles = files.filter(file => file.type === 'application/pdf')
-  uploadedFiles.value.push(...pdfFiles)
-  if (pdfFiles.length > 0) {
-    uiStore.showToast({ type: 'success', message: `${pdfFiles.length} arquivo(s) adicionado(s)` })
+  const pdfFile = files.find(file => file.type === 'application/pdf')
+  
+  if (pdfFile) {
+    if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+    
+    uploadedFiles.value = [pdfFile]
+    previewUrl.value = URL.createObjectURL(pdfFile)
+    
+    uiStore.showToast({ type: 'success', message: 'PDF carregado com sucesso' })
+  } else {
+    uiStore.showToast({ type: 'warning', message: 'Por favor, selecione apenas arquivos PDF' })
   }
 }
 
-const removeFile = (index: number) => {
-  uploadedFiles.value.splice(index, 1)
+const clearFile = () => {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+  uploadedFiles.value = []
+  previewUrl.value = null
+  if (fileInput.value) fileInput.value.value = ''
 }
 
 const formatFileSize = (bytes: number) => {
