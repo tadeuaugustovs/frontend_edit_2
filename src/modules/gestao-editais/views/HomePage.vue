@@ -55,7 +55,7 @@
               <p class="text-sm text-gray-600 mb-4 flex-grow">
                 Crie e gerencie editais, faça upload de documentos e configure metadados
               </p>
-              <Button variant="outline" size="sm" class="w-full group-hover:bg-blue-50">
+              <Button variant="outline" size="sm" class="w-full bg-white dark:bg-transparent dark:text-gray-200 dark:border-gray-700 dark:hover:bg-slate-800 dark:hover:text-white group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30">
                 Acessar
               </Button>
             </div>
@@ -78,7 +78,7 @@
               <p class="text-sm text-gray-600 mb-4 flex-grow">
                 Visualize estatísticas de engajamento e mensagens por edital
               </p>
-              <Button variant="outline" size="sm" class="w-full group-hover:bg-green-50">
+              <Button variant="outline" size="sm" class="w-full bg-white dark:bg-transparent dark:text-gray-200 dark:border-gray-700 dark:hover:bg-slate-800 dark:hover:text-white group-hover:bg-green-50 dark:group-hover:bg-green-900/30">
                 Acessar
               </Button>
             </div>
@@ -101,7 +101,7 @@
               <p class="text-sm text-gray-600 mb-4 flex-grow">
                 Acesse o histórico completo de conversas entre usuários e chatbot
               </p>
-              <Button variant="outline" size="sm" class="w-full group-hover:bg-purple-50">
+              <Button variant="outline" size="sm" class="w-full bg-white dark:bg-transparent dark:text-gray-200 dark:border-gray-700 dark:hover:bg-slate-800 dark:hover:text-white group-hover:bg-purple-50 dark:group-hover:bg-purple-900/30">
                 Acessar
               </Button>
             </div>

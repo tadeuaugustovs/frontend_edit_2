@@ -202,18 +202,52 @@
                     </select>
                   </div>
 
-                  <!-- Cron personalizado (se selecionado) -->
-                  <div v-if="routineForm.frequency === 'custom'">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Expressão Cron</label>
-                    <input
-                      v-model="routineForm.cronExpression"
-                      type="text"
-                      placeholder="0 9 * * 1 (toda segunda às 9h)"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                    <p class="text-xs text-slate-500 mt-1">
-                      Exemplo: "0 9 * * 1" = toda segunda-feira às 9h
-                    </p>
+                  <!-- Frequência Personalizada (No-Code) -->
+                  <div v-if="routineForm.frequency === 'custom'" class="bg-blue-50/50 rounded-lg p-4 border border-blue-100 space-y-4">
+                    <div class="flex gap-4">
+                      <div class="w-1/3">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Repetir a cada</label>
+                        <input
+                          v-model="routineForm.customInterval"
+                          type="number"
+                          min="1"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div class="flex-1">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Unidade</label>
+                        <select
+                          v-model="routineForm.customUnit"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="days">Dias</option>
+                          <option value="weeks">Semanas</option>
+                          <option value="months">Meses</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Dias da Semana (Opcional - apenas se Semanas ou Dias) -->
+                    <div v-if="['weeks', 'days'].includes(routineForm.customUnit)">
+                      <label class="block text-xs font-medium text-slate-700 mb-2">Dias da semana (Opcional)</label>
+                      <div class="flex flex-wrap gap-2">
+                        <label 
+                          v-for="day in weekDays" 
+                          :key="day.value"
+                          class="cursor-pointer"
+                        >
+                          <input 
+                            type="checkbox" 
+                            :value="day.value"
+                            v-model="routineForm.customWeekdays"
+                            class="peer hidden"
+                          >
+                          <div class="px-3 py-1.5 rounded-md text-xs font-medium border border-gray-200 text-slate-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-gray-50 transition-all">
+                            {{ day.label }}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -386,12 +420,27 @@ const routines = ref([
   }
 ])
 
+const weekDays = [
+  { label: 'Seg', value: 'mon' },
+  { label: 'Ter', value: 'tue' },
+  { label: 'Qua', value: 'wed' },
+  { label: 'Qui', value: 'thu' },
+  { label: 'Sex', value: 'fri' },
+  { label: 'Sáb', value: 'sat' },
+  { label: 'Dom', value: 'sun' }
+]
+
 // Formulário da rotina
 const routineForm = reactive({
   name: '',
-  recipients: [],
+  recipients: [] as string[],
   frequency: '',
   cronExpression: '',
+  // Novos campos para custom frequency
+  customInterval: 1,
+  customUnit: 'days',
+  customWeekdays: [] as string[],
+  
   emailMessage: `Prezados,
 
 Segue em anexo o Relatório de Gestão Integrada da FAPES, contendo os indicadores de performance dos editais e métricas de eficiência da IA referentes ao último período.
@@ -417,9 +466,14 @@ const createNewRoutine = () => {
   activeTab.value = 'editor'
 }
 
-const editRoutine = (routine) => {
+const editRoutine = (routine: any) => {
   editingRoutine.value = routine
   Object.assign(routineForm, routine)
+  // Se editando uma rotina custom, garantir que os campos existam ou setar defaults
+  if (!routine.customInterval) routineForm.customInterval = 1
+  if (!routine.customUnit) routineForm.customUnit = 'days'
+  if (!routine.customWeekdays) routineForm.customWeekdays = []
+  
   activeTab.value = 'editor'
 }
 
@@ -429,6 +483,9 @@ const resetForm = () => {
     recipients: [],
     frequency: '',
     cronExpression: '',
+    customInterval: 1,
+    customUnit: 'days',
+    customWeekdays: [],
     emailMessage: `Prezados,
 
 Segue em anexo o Relatório de Gestão Integrada da FAPES, contendo os indicadores de performance dos editais e métricas de eficiência da IA referentes ao último período.
@@ -455,7 +512,7 @@ const addRecipient = () => {
   }
 }
 
-const removeRecipient = (index) => {
+const removeRecipient = (index: number) => {
   routineForm.recipients.splice(index, 1)
 }
 
@@ -476,11 +533,11 @@ const testRoutine = () => {
   // Aqui implementaria o envio de teste
 }
 
-const toggleRoutineStatus = (routine) => {
+const toggleRoutineStatus = (routine: any) => {
   routine.status = routine.status === 'active' ? 'paused' : 'active'
 }
 
-const deleteRoutine = (id) => {
+const deleteRoutine = (id: number) => {
   const index = routines.value.findIndex(r => r.id === id)
   if (index > -1) {
     routines.value.splice(index, 1)

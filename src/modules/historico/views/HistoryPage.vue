@@ -1,23 +1,23 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
     <!-- Header with Glassmorphism -->
-    <header class="glass-header sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200/50 shadow-sm">
+    <header class="glass-header sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-gray-200/50 dark:border-slate-700/50 shadow-sm">
       <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" @click="router.push('/')" class="gap-2">
+            <Button variant="ghost" size="sm" @click="router.push('/')" class="gap-2 dark:text-gray-200 dark:hover:bg-slate-800">
               <ArrowLeft class="h-4 w-4" />
               Voltar
             </Button>
-            <div class="border-l border-gray-300 pl-4">
-              <h1 class="text-xl font-semibold text-gray-900">Histórico de Conversas</h1>
-              <p class="text-xs text-gray-500">Visualize e gerencie conversas do chatbot</p>
+            <div class="border-l border-gray-300 dark:border-slate-700 pl-4">
+              <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Histórico de Conversas</h1>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Visualize e gerencie conversas do chatbot</p>
             </div>
           </div>
           <div class="flex items-center space-x-3">
             <AccessibilityMenu />
-            <span class="text-sm text-gray-600 font-medium">{{ authStore.user?.name || 'admin' }}</span>
-            <Button variant="outline" size="sm" @click="handleLogout" class="gap-2">
+            <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">{{ authStore.user?.name || 'admin' }}</span>
+            <Button variant="outline" size="sm" @click="handleLogout" class="gap-2 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800">
               <LogOut class="h-4 w-4" />
               Sair
             </Button>
@@ -30,10 +30,10 @@
     <main class="container mx-auto px-6 py-8">
       <div class="max-w-7xl mx-auto space-y-6">
         <!-- Info Alert -->
-        <div class="glass-card backdrop-blur-sm bg-white/60 border border-gray-200/50 rounded-xl p-4">
+        <div class="glass-card backdrop-blur-sm bg-white/60 dark:bg-slate-900/60 border border-gray-200/50 dark:border-slate-700/50 rounded-xl p-4">
           <div class="flex items-center gap-2">
-            <Info class="h-4 w-4 text-blue-600" />
-            <p class="text-sm text-gray-600">
+            <Info class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <p class="text-sm text-gray-600 dark:text-gray-300">
               <strong>Dica:</strong> Use a busca para filtrar sessões por email ou ID de usuário. Clique em uma sessão para visualizar a conversa completa.
             </p>
           </div>
@@ -52,7 +52,7 @@
           <div class="flex flex-col">
             <SessionsList
               :sessions="sessions"
-              :selected-session-id="selectedSessionId"
+              :selected-session-id="selectedSessionId || undefined"
               :is-loading="isLoadingSessions"
               @session-select="handleSessionSelect"
               @search="handleSearch"
