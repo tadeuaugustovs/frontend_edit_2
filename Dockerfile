@@ -1,18 +1,13 @@
-FROM node:20-alpine
-
+# Estágio de build
+FROM node:20-alpine as build-stage
 WORKDIR /app
-
-# copia package
-COPY package.json package-lock.json ./
-
-# instala dependências
+COPY package*.json ./
 RUN npm ci
-
-# copia código fonte
 COPY . .
+RUN npm run build
 
-# expõe porta para o servidor de desenvolvimento do Vite
-EXPOSE 5173
-
-# inicia o servidor de desenvolvimento
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Estágio de produção
+FROM nginx:stable-alpine as production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

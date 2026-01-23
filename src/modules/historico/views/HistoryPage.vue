@@ -1,18 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-      <div class="container mx-auto px-4 py-4">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <!-- Header with Glassmorphism -->
+    <header class="glass-header sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-gray-200/50 dark:border-slate-700/50 shadow-sm">
+      <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" @click="router.push('/')">
-              ← Voltar
+            <Button variant="ghost" size="sm" @click="router.push('/')" class="gap-2 dark:text-gray-200 dark:hover:bg-slate-800">
+              <ArrowLeft class="h-4 w-4" />
+              Voltar
             </Button>
-            <h1 class="text-2xl font-bold text-gray-900">Histórico de Conversas</h1>
+            <div class="border-l border-gray-300 dark:border-slate-700 pl-4">
+              <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Histórico de Conversas</h1>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Visualize e gerencie conversas do chatbot</p>
+            </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">{{ authStore.user?.name }}</span>
-            <Button variant="outline" size="sm" @click="handleLogout">
+          <div class="flex items-center space-x-3">
+            <AccessibilityMenu />
+            <span class="text-sm text-gray-600 dark:text-gray-300 font-medium">{{ authStore.user?.name || 'admin' }}</span>
+            <Button variant="outline" size="sm" @click="handleLogout" class="gap-2 dark:border-slate-700 dark:text-gray-200 dark:hover:bg-slate-800">
+              <LogOut class="h-4 w-4" />
               Sair
             </Button>
           </div>
@@ -21,14 +27,17 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-6 py-8">
       <div class="max-w-7xl mx-auto space-y-6">
         <!-- Info Alert -->
-        <Alert>
-          <p class="text-sm">
-            <strong>Dica:</strong> Use a busca para filtrar sessões por número de usuário. Clique em uma sessão para visualizar a conversa completa.
-          </p>
-        </Alert>
+        <div class="glass-card backdrop-blur-sm bg-white/60 dark:bg-slate-900/60 border border-gray-200/50 dark:border-slate-700/50 rounded-xl p-4">
+          <div class="flex items-center gap-2">
+            <Info class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              <strong>Dica:</strong> Use a busca para filtrar sessões por email ou ID de usuário. Clique em uma sessão para visualizar a conversa completa.
+            </p>
+          </div>
+        </div>
 
         <!-- Clear Selection Button -->
         <div v-if="selectedSessionId" class="flex justify-end">
@@ -38,24 +47,20 @@
         </div>
 
         <!-- Grid Layout com altura fixa -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-20px)]">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
           <!-- Sessions List -->
-          <div class="flex flex-col overflow-y-auto h-full">
+          <div class="flex flex-col">
             <SessionsList
               :sessions="sessions"
-              :selected-session-id="selectedSessionId"
+              :selected-session-id="selectedSessionId || undefined"
               :is-loading="isLoadingSessions"
-              :current-page="currentPage"
-              :total-pages="totalPages"
-              :total-items="total"
               @session-select="handleSessionSelect"
               @search="handleSearch"
-              @page-change="handlePageChange"
             />
           </div>
 
           <!-- Chat Viewer -->
-          <div class="flex flex-col overflow-y-auto h-full">
+          <div class="flex flex-col">
             <ChatViewer
               :session="selectedSession"
               :is-loading="isLoadingSession"
@@ -74,9 +79,10 @@ import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { useConversas } from '@/common/composables/useConversas'
 import Button from '@/common/components/ui/Button.vue'
-import Alert from '@/common/components/ui/Alert.vue'
+import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
 import SessionsList from '@/modules/historico/components/SessionsList.vue'
 import ChatViewer from '@/modules/historico/components/ChatViewer.vue'
+import { ArrowLeft, LogOut, Info } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -85,40 +91,35 @@ const uiStore = useUiStore()
 // Usar o composable de conversas com dados reais do Django
 const {
   conversas,
-  conversasFiltradas,
   conversaAtual,
   isLoading,
   error,
-  currentPage,
-  totalPages,
-  total,
-  searchQuery,
   carregarConversas,
   carregarDetalhesConversa,
   limparConversaAtual,
-  irParaPagina,
   filtrarPorUsuario
 } = useConversas()
 
 const selectedSessionId = ref<string | null>(null)
+const searchQuery = ref('')
 
 // Computed properties para compatibilidade com o template
-const sessions = computed(() => conversasFiltradas.value)
+const sessions = computed(() => conversas.value)
 const selectedSession = computed(() => conversaAtual.value)
 const isLoadingSessions = computed(() => isLoading.value)
 const isLoadingSession = computed(() => isLoading.value)
 
-const loadSessions = async (page = 1) => {
+const loadSessions = async () => {
   try {
-    console.log('[i] Carregando conversas do Django...')
-    await carregarConversas(page)
+    console.log('🔄 Carregando conversas do Django...')
+    await carregarConversas(1, true)
     
     uiStore.showToast({
       type: 'success',
-      message: `${conversas.value.length} conversas carregadas (página ${currentPage.value} de ${totalPages.value})`,
+      message: `${conversas.value.length} conversas carregadas do Django`,
     })
   } catch (err: any) {
-    console.error('[x] Erro ao carregar conversas:', err)
+    console.error('❌ Erro ao carregar conversas:', err)
     uiStore.showToast({
       type: 'error',
       message: err.message || 'Erro ao carregar conversas do Django',
@@ -128,16 +129,16 @@ const loadSessions = async (page = 1) => {
 
 const loadSessionDetail = async (sessionId: string) => {
   try {
-    console.log('[i] Carregando detalhes da conversa:', sessionId)
+    console.log('🔍 Carregando detalhes da conversa:', sessionId)
     await carregarDetalhesConversa(parseInt(sessionId))
     
     if (error.value) {
       throw new Error(error.value)
     }
     
-    console.log('[*] Detalhes carregados com sucesso')
+    console.log('✅ Detalhes carregados com sucesso')
   } catch (err: any) {
-    console.error('[x] Erro ao carregar detalhes:', err)
+    console.error('❌ Erro ao carregar detalhes:', err)
     uiStore.showToast({
       type: 'error',
       message: err.message || 'Erro ao carregar detalhes da conversa',
@@ -150,16 +151,37 @@ const handleSessionSelect = (sessionId: string) => {
   loadSessionDetail(sessionId)
 }
 
-const handlePageChange = async (page: number) => {
-  await loadSessions(page)
-}
-
 const handleSearch = async (query: string) => {
   searchQuery.value = query
-  console.log('[i] Buscando por:', query)
+  
+  if (!query.trim()) {
+    loadSessions()
+    return
+  }
+
+  try {
+    console.log('🔍 Buscando por:', query)
+    
+    // Filtrar conversas localmente por enquanto
+    // TODO: Implementar busca no backend Django se necessário
+    const filtradas = filtrarPorUsuario(query)
+    
+    console.log('✅ Encontradas', filtradas.length, 'conversas')
+    
+    if (filtradas.length === 0) {
+      uiStore.showToast({
+        type: 'info',
+        message: 'Nenhuma conversa encontrada para este usuário',
+      })
+    }
+  } catch (err: any) {
+    console.error('❌ Erro na busca:', err)
+    uiStore.showToast({
+      type: 'error',
+      message: 'Erro ao buscar conversas',
+    })
+  }
 }
-
-
 
 const clearSelection = () => {
   selectedSessionId.value = null
@@ -176,7 +198,7 @@ const handleLogout = () => {
 }
 
 onMounted(() => {
-  console.log('[i] Iniciando página de histórico...')
+  console.log('📱 Iniciando página de histórico...')
   loadSessions()
 })
 </script>

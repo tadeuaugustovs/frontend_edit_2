@@ -1,36 +1,59 @@
-# Sistema de Gestão de Editais FAPES
+# Sistema de Gestão de Editais - FAPES (Front-end)
 
-Sistema de gestão de editais desenvolvido com Vue.js 3, TypeScript e TailwindCSS, seguindo o padrão modular LEDS.
+O **Sistema de Gestão de Editais** é uma interface administrativa moderna e intuitiva desenvolvida para a FAPES. O objetivo é facilitar o cadastro, edição e acompanhamento de editais de fomento, garantindo usabilidade e conformidade com padrões visuais corporativos.
 
-## Pré-requisitos 
-- Docker
-- Docker Compose
-- Node.js (versão 16 ou superior)
-- npm (gerenciador de pacotes do Node.js)
-- Vue CLI (opcional, para facilitar o desenvolvimento)
-- Django (para o backend), disponível em: [Repositório Django](https://github.com/leds-conectafapes/agentes-edite-controlpanel)
+## 🚀 Sobre o Projeto
 
-## Instalação
-1. Clone o repositório:
-    ```bash
-    git clone https://github.com/Ilhe8l/agentes-edite-frontend.git
+Este frontend foi construído com foco em performance e experiência do usuário (UX). Oferece um painel de controle limpo, feedback visual imediato (toasts), e interações dinâmicas (modais, filtros em tempo real).
 
-    cd agentes-edite-frontend
-    ```
-2. Configure as variáveis de ambiente:
-    - Crie um arquivo `.env` na raiz do projeto e adicione as variáveis necessárias conforme o arquivo `.env.example`.
-3. Construa e inicie os contêineres Docker:
-    ```bash
-    docker-compose up --build
-    ```
-4. Acesse a aplicação:
-    - Abra o navegador e vá para `http://localhost:5173`.
+### Principais Funcionalidades:
+*   **Gestão de Editais**: Listagem paginada, filtros por status e busca textual.
+*   **CRUD Completo**: Criação e Edição (Inclusive modo "In-Place" via Modal).
+*   **Visualização de Detalhes**: Modal detalhado com pré-visualização de arquivos.
+*   **Upload de Documentos**: Suporte a envio de PDFs e anexos.
+*   **Design Responsivo**: Adaptável a diferentes tamanhos de tela e suporte a Dark Mode.
 
-## Detalhes do Projeto
-- **Frontend**: Desenvolvido com Vue.js 3, TypeScript e TailwindCSS.
-- **Backend**: Desenvolvido com Django (repositório separado).
-- **Padrão Modular**: Segue o padrão LEDS para organização do código.
-- **Mocks**: A aplicação não inclui dados mockados, dependendo do backend para funcionalidade completa.
+## 🛠 Tecnologias Utilizadas
 
-## Contribuição
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests.
+*   **Vue.js 3** (Composition API, Script Setup)
+*   **TypeScript** (Segurança de tipos)
+*   **Vite** (Build tool ultrarrápido)
+*   **TailwindCSS** (Estilização utilitária e design system)
+*   **Pinia** (Gerenciamento de estado)
+*   **Docker** (Containerização para produção)
+*   **Lucide Vue Next** (Ícones SVG modernos)
+
+## 📦 Como Rodar
+
+### Pré-requisitos
+*   Node.js 18+ ou Docker instalado.
+
+### 1. Desenvolvimento Local
+
+Para rodar o projeto em modo de desenvolvimento (hot-reload):
+
+```bash
+# Instale as dependências
+npm install
+
+# Inicie o servidor dev
+npm run dev
+```
+O sistema estará acessível em `http://localhost:5173`.
+
+### 2. Produção com Docker
+
+Para rodar a versão de produção containerizada (Nginx):
+
+```bash
+# Construa e suba o container
+docker-compose up -d --build
+```
+O sistema estará acessível em `http://localhost:3000`.
+
+## 📸 Screenshots
+
+*(Espaço reservado para capturas de tela do Painel, Modal de Detalhes e Formulários)*
+
+---
+**FAPES** - Fundação de Amparo à Pesquisa do Espírito Santo

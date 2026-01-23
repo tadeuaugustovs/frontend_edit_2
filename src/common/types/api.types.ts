@@ -5,12 +5,19 @@ export interface ApiResponse<T> {
   message?: string
 }
 
-
+export interface EditalMetrics {
+  id: string
+  title: string
+  messageCount: number
+  uniqueUsers: number
+  lastMessage: string
+}
 
 export interface EngagementMetricsResponse {
   total_messages: number
   total_users: number
-
+  total_editals: number
+  editals: EditalMetrics[]
 }
 
 export interface Message {
@@ -20,7 +27,7 @@ export interface Message {
   question: string
   botResponse: string
   timestamp: string
-
+  editalId?: string
 }
 
 // Tipos baseados na API real do Django
@@ -79,7 +86,7 @@ export interface ConversationSession {
   startTime: string
   endTime: string
   messageCount: number
-
+  edital?: string
   messages?: ConversationMessage[]
 }
 
@@ -95,5 +102,7 @@ export type { User, AuthTokens, LoginCredentials } from './user.types'
 export type { 
   DynamicField, 
   UploadedFile, 
-
+  EditalFormData, 
+  EditalPayload, 
+  EditalResponse 
 } from './edital.types'

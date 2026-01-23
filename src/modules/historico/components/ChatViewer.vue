@@ -1,5 +1,5 @@
 <template>
-  <Card class="h-full flex flex-col">
+  <Card class="h-full flex flex-col bg-white dark:bg-gray-900">
     <CardHeader class="flex-shrink-0">
       <div class="flex items-center justify-between">
         <div>
@@ -33,7 +33,7 @@
 
       <!-- Chat Messages -->
       <div v-else class="flex-1 overflow-hidden">
-        <div ref="messagesContainer" class="h-full overflow-y-auto p-4 bg-gray-50 rounded-lg">
+        <div ref="messagesContainer" class="h-full overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div class="space-y-4">
             <div
               v-for="message in session.messages"
@@ -62,7 +62,7 @@
 
       <!-- Session Info -->
       <div v-if="session" class="mt-4 pt-4 border-t flex-shrink-0">
-        <div class="grid grid-cols-3 gap-4 text-sm">
+        <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p class="text-gray-600">Início da sessão</p>
             <p class="font-medium">{{ formatDate(session.startTime) }}</p>
@@ -70,6 +70,10 @@
           <div>
             <p class="text-gray-600">Fim da sessão</p>
             <p class="font-medium">{{ formatDate(session.endTime) }}</p>
+          </div>
+          <div v-if="session.edital">
+            <p class="text-gray-600">Edital</p>
+            <p class="font-medium">{{ session.edital }}</p>
           </div>
           <div>
             <p class="text-gray-600">Duração</p>
@@ -108,7 +112,7 @@ const messageClasses = (role: 'user' | 'bot') => {
   if (role === 'user') {
     return 'bg-blue-500 text-white'
   }
-  return 'bg-white border border-gray-200 text-gray-900'
+  return 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100'
 }
 
 const formatDate = (timestamp: string): string => {

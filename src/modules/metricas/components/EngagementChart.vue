@@ -1,215 +1,146 @@
 <template>
-  <Card>
-    <CardHeader>
-      <CardTitle>Engajamento por Edital</CardTitle>
-      <CardDescription>
-        Clique em uma barra para filtrar mensagens por edital
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div class="space-y-6">
-        <!-- Bar Chart -->
-        <div class="h-80">
-          <canvas ref="barChartRef"></canvas>
-        </div>
-
-        <!-- Pie Chart -->
-        <div class="h-64">
-          <canvas ref="pieChartRef"></canvas>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+  <div class="h-80 w-full">
+    <canvas 
+      ref="chartCanvas" 
+      class="w-full h-full"
+      width="400"
+      height="320"
+    ></canvas>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
-import {
-  Chart,
-  BarController,
-  PieController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js'
-import Card from '@/common/components/ui/Card.vue'
-import CardHeader from '@/common/components/ui/CardHeader.vue'
-import CardTitle from '@/common/components/ui/CardTitle.vue'
-import CardDescription from '@/common/components/ui/CardDescription.vue'
-import CardContent from '@/common/components/ui/CardContent.vue'
-import type { EditalMetrics } from '@/common/types/api.types'
+import { ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 
-// Register Chart.js components
-Chart.register(
-  BarController,
-  PieController,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-)
-
-export interface EngagementChartProps {
-  data: EditalMetrics[]
-}
-
-const props = defineProps<EngagementChartProps>()
-
-const emit = defineEmits<{
-  'edital-click': [id: string]
+const props = defineProps<{
+  title: string
+  labels: string[]
+  data: number[]
+  type?: 'bar' | 'line' | 'pie' | 'doughnut' | 'horizontalBar' | 'area'
+  backgroundColor?: string | string[]
 }>()
 
-const barChartRef = ref<HTMLCanvasElement | null>(null)
-const pieChartRef = ref<HTMLCanvasElement | null>(null)
-let barChart: Chart | null = null
-let pieChart: Chart | null = null
+const chartCanvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: any = null
 
-const colors = [
-  'rgba(59, 130, 246, 0.8)',   // blue
-  'rgba(16, 185, 129, 0.8)',   // green
-  'rgba(139, 92, 246, 0.8)',   // purple
-  'rgba(251, 146, 60, 0.8)',   // orange
-  'rgba(236, 72, 153, 0.8)',   // pink
-]
-
-const createBarChart = () => {
-  if (!barChartRef.value || !props.data.length) return
-
-  const ctx = barChartRef.value.getContext('2d')
-  if (!ctx) return
-
-  // Destroy existing chart
-  if (barChart) {
-    barChart.destroy()
+const destroyChart = () => {
+  if (chartInstance) {
+    try {
+      chartInstance.destroy()
+    } catch (e) {
+      console.warn('Erro ao destruir gráfico:', e)
+    }
+    chartInstance = null
   }
-
-  barChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: props.data.map(d => d.title.substring(0, 30) + '...'),
-      datasets: [
-        {
-          label: 'Mensagens',
-          data: props.data.map(d => d.messageCount),
-          backgroundColor: colors,
-          borderColor: colors.map(c => c.replace('0.8', '1')),
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index
-          emit('edital-click', props.data[index].id)
-        }
-      },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const edital = props.data[context.dataIndex]
-              return [
-                `Mensagens: ${edital.messageCount}`,
-                `Usuários: ${edital.uniqueUsers}`,
-                `Última mensagem: ${edital.lastMessage}`,
-              ]
-            },
-          },
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            precision: 0,
-          },
-        },
-      },
-    },
-  })
 }
 
-const createPieChart = () => {
-  if (!pieChartRef.value || !props.data.length) return
+const createChart = async () => {
+  try {
+    // Wait for DOM
+    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    console.log('🎨 Iniciando criação do gráfico:', {
+      title: props.title,
+      type: props.type,
+      labelsLength: props.labels?.length,
+      dataLength: props.data?.length,
+      canvas: !!chartCanvas.value
+    })
 
-  const ctx = pieChartRef.value.getContext('2d')
-  if (!ctx) return
+    if (!chartCanvas.value) {
+      console.error('❌ Canvas não encontrado')
+      return
+    }
 
-  // Destroy existing chart
-  if (pieChart) {
-    pieChart.destroy()
+    // Destroy existing chart
+    destroyChart()
+
+    // Get context
+    const ctx = chartCanvas.value.getContext('2d')
+    if (!ctx) {
+      console.error('❌ Contexto 2D não encontrado')
+      return
+    }
+
+    // Validate data
+    if (!props.labels?.length || !props.data?.length) {
+      console.warn('⚠️ Dados insuficientes:', { labels: props.labels, data: props.data })
+      return
+    }
+
+    // Import Chart.js dynamically
+    const { default: Chart } = await import('chart.js/auto')
+    
+    // Colors
+    const colors = [
+      '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+      '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+    ]
+
+    // Chart type and axis
+    let chartType = props.type || 'bar'
+    let indexAxis = 'x'
+    
+    if (chartType === 'horizontalBar') {
+      chartType = 'bar'
+      indexAxis = 'y'
+    }
+
+    // Configuration
+    const config = {
+      type: chartType,
+      data: {
+        labels: props.labels,
+        datasets: [{
+          label: props.title,
+          data: props.data,
+          backgroundColor: colors.slice(0, props.data.length),
+          borderColor: chartType === 'line' ? '#3b82f6' : undefined,
+          borderWidth: 1,
+          tension: chartType === 'line' ? 0.4 : undefined
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: indexAxis,
+        plugins: {
+          legend: {
+            display: chartType === 'pie' || chartType === 'doughnut'
+          }
+        },
+        scales: chartType !== 'pie' && chartType !== 'doughnut' ? {
+          y: { beginAtZero: true },
+          x: { beginAtZero: true }
+        } : {}
+      }
+    }
+
+    console.log('📊 Criando gráfico com config:', config)
+    
+    // Create chart
+    chartInstance = new Chart(ctx, config)
+    
+    console.log('✅ Gráfico criado:', chartInstance)
+    
+  } catch (error) {
+    console.error('❌ Erro ao criar gráfico:', error)
   }
-
-  pieChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: props.data.map(d => d.title.substring(0, 20) + '...'),
-      datasets: [
-        {
-          data: props.data.map(d => d.messageCount),
-          backgroundColor: colors,
-          borderColor: '#fff',
-          borderWidth: 2,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index
-          emit('edital-click', props.data[index].id)
-        }
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const edital = props.data[context.dataIndex]
-              const total = props.data.reduce((sum, d) => sum + d.messageCount, 0)
-              const percentage = ((edital.messageCount / total) * 100).toFixed(1)
-              return `${edital.messageCount} mensagens (${percentage}%)`
-            },
-          },
-        },
-      },
-    },
-  })
 }
 
 onMounted(() => {
-  createBarChart()
-  createPieChart()
+  console.log('🔄 EngagementChart montado')
+  createChart()
 })
-
-watch(() => props.data, () => {
-  createBarChart()
-  createPieChart()
-}, { deep: true })
 
 onBeforeUnmount(() => {
-  if (barChart) {
-    barChart.destroy()
-  }
-  if (pieChart) {
-    pieChart.destroy()
-  }
+  console.log('🔄 EngagementChart desmontado')
+  destroyChart()
 })
+
+watch(() => [props.labels, props.data, props.type], () => {
+  console.log('🔄 Props alteradas, recriando gráfico')
+  createChart()
+}, { deep: true })
 </script>
