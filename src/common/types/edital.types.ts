@@ -15,8 +15,10 @@ export interface UploadedFile {
 }
 
 export interface EditalFormData {
+  numero: string // ID do Edital (xx/xxxx)
   title: string
-  description: string
+  description: string // Mapeia para 'metadata.description' ou similar, já que ItemConhecimento tem 'nome' (title) e 'metadata'
+  tags: string // No form é string separada por vírgula
   status: 'open' | 'closed' | 'analyzing'
   mainPDF: UploadedFile | null
   dynamicFields: DynamicField[]
@@ -25,9 +27,11 @@ export interface EditalFormData {
 }
 
 export interface EditalPayload {
-  title: string
-  description: string
+  numero: string
+  nome: string // Backend usa 'nome' herdado de ItemConhecimento
+  descricao: string // Vamos ver onde salvar, provavelmente metadata ou criar campo custom se nao tiver
   status: string
+  tags: string[]
   metadata: Record<string, string>
   files: {
     mainPDF: { name: string; originalName: string } | null
@@ -37,16 +41,14 @@ export interface EditalPayload {
 }
 
 export interface EditalResponse {
-  id: string
-  title: string
-  description: string
+  id: number
+  numero: string
+  nome: string
   status: string
-  metadata: Record<string, string>
-  created_at: string
-  updated_at: string
-  files: {
-    main_pdf?: string
-    annexes: Array<{ id: string; name: string; url: string }>
-    results: Array<{ id: string; name: string; url: string }>
-  }
+  tags: string[]
+  metadata: Record<string, any>
+  arquivo: string | null // Main PDF
+  arquivos: Array<{ id: number; nome: string; arquivo: string }> // Anexos (Model Anexo)
+  created_at?: string
+  updated_at?: string
 }

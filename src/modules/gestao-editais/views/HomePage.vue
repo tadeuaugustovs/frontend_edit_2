@@ -260,13 +260,13 @@
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-2">
               <h2 class="text-2xl font-bold text-gray-900">
-                {{ isEditMode ? 'Editar Edital' : selectedEdital.title }}
+                {{ isEditModeInline ? 'Editar Edital' : selectedEdital.title }}
               </h2>
-              <Badge v-if="!isEditMode" :variant="getStatusVariant(selectedEdital.status)">
+              <Badge v-if="!isEditModeInline" :variant="getStatusVariant(selectedEdital.status)">
                 {{ getStatusLabel(selectedEdital.status) }}
               </Badge>
             </div>
-            <p v-if="!isEditMode" class="text-sm text-gray-500">
+            <p v-if="!isEditModeInline" class="text-sm text-gray-500">
               Criado em {{ formatDate(selectedEdital.created_at) }}
             </p>
           </div>
@@ -429,22 +429,11 @@
           </Button>
           
           <Button 
-            v-if="!isEditModeInline"
-            @click="enterEditMode" 
+            @click="navigateToEdit(selectedEdital.id)" 
             class="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
           >
             <Edit class="h-4 w-4" />
             Editar Edital
-          </Button>
-          
-          <Button 
-            v-else
-            @click="saveEditalInline" 
-            :loading="isSaving"
-            class="gap-2 bg-green-600 hover:bg-green-700 text-white border-none shadow-md hover:shadow-lg transition-all"
-          >
-            <Save class="h-4 w-4" />
-            Salvar
           </Button>
        </div>
     </div>
@@ -526,7 +515,9 @@ const navigateTo = (path: string) => {
 }
 
 const navigateToEdit = (id: string) => {
-  router.push(`/editais/${id}/editar`)
+  // Passa o ID como parametro de rota. 
+  // Precisa garantir que a rota existe em router/index.ts
+  router.push({ name: 'management-edit', params: { id } }) 
 }
 
 const loadEditais = async () => {

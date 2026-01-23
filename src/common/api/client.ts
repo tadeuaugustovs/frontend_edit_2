@@ -30,7 +30,7 @@ class ApiClient {
         const token = localStorage.getItem('access_token')
 
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`
+          config.headers.Authorization = `Token ${token}`
         }
 
         return config
@@ -52,7 +52,7 @@ class ApiClient {
               this.failedQueue.push({ resolve, reject })
             })
               .then((token) => {
-                originalRequest.headers.Authorization = `Bearer ${token}`
+                originalRequest.headers.Authorization = `Token ${token}`
                 return this.instance(originalRequest)
               })
               .catch((err) => Promise.reject(err))
@@ -86,7 +86,7 @@ class ApiClient {
             this.failedQueue.forEach((prom) => prom.resolve(access))
             this.failedQueue = []
 
-            originalRequest.headers.Authorization = `Bearer ${access}`
+            originalRequest.headers.Authorization = `Token ${access}`
             return this.instance(originalRequest)
           } catch (refreshError) {
             this.failedQueue.forEach((prom) => prom.reject(refreshError))
@@ -121,7 +121,7 @@ class ApiClient {
         headers: this.instance.defaults.headers
       })
     }
-    
+
     const response = await this.instance.post<T>(url, data, config)
     return response.data
   }
