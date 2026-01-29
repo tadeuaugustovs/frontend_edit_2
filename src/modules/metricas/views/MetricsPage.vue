@@ -45,19 +45,10 @@
               <Trash2 class="h-4 w-4" />
               Limpar Cache
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              @click="toggleEditMode" 
-              class="gap-2"
-              :class="{ 'bg-blue-50 border-blue-300 text-blue-700': isEditMode }"
-            >
-              <Settings class="h-4 w-4" />
-              {{ isEditMode ? 'Finalizar Edição' : 'Configurar Dashboard' }}
-            </Button>
+            <!-- Botão de Configuração removido conforme solicitação -->
             <Button variant="outline" size="sm" @click="openReportsCenter" class="gap-2">
               <Reports class="h-4 w-4" />
-              Central de Relatórios
+              Enviar Relatório por E-mail
             </Button>
           </div>
         </div>
@@ -418,15 +409,7 @@ const clearCache = () => {
   loadMetrics()
 }
 
-const toggleEditMode = () => {
-  isEditMode.value = !isEditMode.value
-  if (!isEditMode.value) {
-    uiStore.showToast({
-      type: 'success',
-      message: 'Configurações do dashboard salvas'
-    })
-  }
-}
+
 
 const toggleWidgetVisibility = (widgetId: string) => {
   widgetVisibility.value[widgetId] = !widgetVisibility.value[widgetId]
