@@ -14,24 +14,29 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-      // Proxy para contornar CORS
+      // Proxy para contornar CORS e direcionar para Backend Local
       '/api-token-auth': {
-        target: 'https://controlpanel.aws.leds.dev.br',
+        target: 'http://127.0.0.1:8002',
         changeOrigin: true,
         secure: false,
       },
       '/edital': {
-        target: 'https://controlpanel.aws.leds.dev.br',
+        target: 'http://127.0.0.1:8002',
         changeOrigin: true,
         secure: false,
       },
       '/discussao': {
-        target: 'https://controlpanel.aws.leds.dev.br',
+        target: 'http://127.0.0.1:8002',
         changeOrigin: true,
         secure: false,
       },
       '/core': {
-        target: 'https://controlpanel.aws.leds.dev.br',
+        target: 'http://127.0.0.1:8002',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://127.0.0.1:8002',
         changeOrigin: true,
         secure: false,
       }

@@ -1,0 +1,38 @@
+<!-- Substituir o botão "Editar Edital" e os botões de ação no modal (linhas ~425-438 do HomePage.vue) por: -->
+
+       <!-- Action Buttons -->
+       <div class="flex gap-3">
+          <Button variant="outline" @click="closeEditalModal">
+            Fechar
+          </Button>
+          
+          <!-- Edit Mode Buttons -->
+          <template v-if="isEditModeInline">
+            <Button 
+              variant="outline"
+              @click="cancelEdit" 
+              class="gap-2"
+            >
+              <X class="h-4 w-4" />
+              Cancelar
+            </Button>
+            <Button 
+              @click="saveEdit" 
+              :disabled="isSaving"
+              class="gap-2 bg-green-600 hover:bg-green-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+            >
+              <Save class="h-4 w-4" />
+              {{ isSaving ? 'Salvando...' : 'Salvar' }}
+            </Button>
+          </template>
+          
+          <!-- View Mode Buttons -->
+          <Button 
+            v-else
+            @click="enableEditMode" 
+            class="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+          >
+            <Edit class="h-4 w-4" />
+            Editar Edital
+          </Button>
+       </div>

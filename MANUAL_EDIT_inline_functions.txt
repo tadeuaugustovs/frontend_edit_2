@@ -1,0 +1,68 @@
+// Funções para edição inline no modal - Adicionar antes do onMounted no HomePage.vue
+
+const enableEditMode = () => {
+  if (!selectedEdital.value) return
+  
+  // Carregar dados do edital no formulário de edição
+  const meta = selectedEdital.value.metadata || {}
+  editForm.value = {
+    title: selectedEdital.value.nome || selectedEdital.value.title || '',
+    description: meta.descricao || selectedEdital.value.description || '',
+    status: (selectedEdital.value.status?.toLowerCase() || 'open') as 'open' | 'closed' | 'analyzing' | 'draft',
+    metadata: []
+  }
+  
+  isEditModeInline.value = true
+}
+
+const cancelEdit = () => {
+  isEditModeInline.value = false
+  editForm.value = {
+    title: '',
+    description: '',
+    status: 'open',
+    metadata: []
+  }
+}
+
+const saveEdit = async () => {
+  if (!selectedEdital.value) return
+  
+  isSaving.value = true
+  try {
+    const updatePayload = {
+      numero: selectedEdital.value.numero,
+      title: editForm.value.title,
+      description: editForm.value.description,
+      tags: selectedEdital.value.tags?.join(', ') || '',
+      status: editForm.value.status,
+      dynamicFields: [],
+      mainPDF: null,
+      annexes: [],
+      results: []
+    }
+    
+    await editalService.updateEdital(selectedEdital.value.id.toString(), updatePayload)
+    
+    uiStore.showToast({
+      type: 'success',
+      message: 'Edital atualizado com sucesso!'
+    })
+    
+    // Recarregar lista de editais
+    await loadEditais()
+    
+    // Fechar modo de edição e modal
+    isEditModeInline.value = false
+    selectedEdital.value = null
+    
+  } catch (error) {
+    console.error('Erro ao salvar edital:', error)
+    uiStore.showToast({
+      type: 'error',
+      message: 'Erro ao salvar edital'
+    })
+  } finally {
+    isSaving.value = false
+  }
+}

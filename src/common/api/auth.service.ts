@@ -5,7 +5,7 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }> {
     console.log('🔐 Tentando login com:', { username: credentials.username })
 
-    // Django Token Auth - endpoint correto
+    // Django Token Auth - endpoint legado (local)
     const response = await apiClient.post<{
       token: string
     }>('/api-token-auth/', {
@@ -15,20 +15,15 @@ export const authService = {
 
     console.log('✅ Login bem-sucedido, token recebido')
 
-    // Adaptar resposta do Django para o formato esperado
-    // Adaptar resposta do Django para o formato esperado
-    // Nota: O endpoint api-token-auth retorna apenas o token, não os dados do usuário.
-    // Para um fluxo completo, deveríamos fazer uma chamada '/api/auth/me/' ou similar logo após.
-    // Por enquanto, usaremos o token retornado e o username fornecido.
     return {
       user: {
-        id: '1', // Placeholder, ideal seria buscar do backend
+        id: '1',
         email: `${credentials.username}@example.com`,
         name: credentials.username
       },
       tokens: {
         access: response.token,
-        refresh: response.token // Token Auth simples não tem refresh token separado
+        refresh: response.token // Backend legado não usa refresh/access par separado neste endpoint
       }
     }
   },

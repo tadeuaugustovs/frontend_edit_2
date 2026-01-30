@@ -173,20 +173,7 @@
                     </Badge>
                   </div>
                   <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ edital.description }}</p>
-                  <div class="flex items-center gap-6 text-xs text-gray-500">
-                    <span class="flex items-center gap-1">
-                      <FileText class="h-3.5 w-3.5" />
-                      {{ edital.metadata_count }} metadados
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <Paperclip class="h-3.5 w-3.5" />
-                      {{ edital.files_count }} arquivos
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <Calendar class="h-3.5 w-3.5" />
-                      {{ formatDate(edital.created_at) }}
-                    </span>
-                  </div>
+
                 </div>
                 <div class="flex gap-2 ml-4">
                   <Button variant="ghost" size="sm" @click.stop="openEditalModal(edital)" class="gap-1.5">
@@ -262,13 +249,11 @@
               <h2 class="text-2xl font-bold text-gray-900">
                 {{ isEditModeInline ? 'Editar Edital' : selectedEdital.title }}
               </h2>
-              <Badge v-if="!isEditModeInline" :variant="getStatusVariant(selectedEdital.status)">
+              <Badge :variant="getStatusVariant(selectedEdital.status)">
                 {{ getStatusLabel(selectedEdital.status) }}
               </Badge>
             </div>
-            <p v-if="!isEditModeInline" class="text-sm text-gray-500">
-              Criado em {{ formatDate(selectedEdital.created_at) }}
-            </p>
+
           </div>
           <button
             @click="closeEditalModal"
@@ -277,114 +262,231 @@
             <X class="h-5 w-5 text-gray-500" />
           </button>
         </div>
-
-        <!-- Modal Content - Professional & Clean Design -->
-        <div class="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
-          <div class="p-6 space-y-8">
-            <!-- Header Section -->
-            <div class="space-y-4">
-              <div class="flex items-start justify-between">
-                <div class="space-y-1">
-                  <!-- Title Edit -->
-                  <div v-if="isEditModeInline">
-                    <input 
-                      v-model="editForm.title"
-                      type="text" 
-                      class="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none w-full"
-                    >
-                  </div>
-                  <h2 v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ selectedEdital.title }}</h2>
-                  
-                  <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                    <span class="flex items-center gap-1.5">
-                      <Calendar class="h-4 w-4" />
-                      Criado em {{ formatDate(selectedEdital.created_at) }}
-                    </span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="font-mono text-xs">ID: {{ selectedEdital.id }}</span>
-                  </div>
+        <!-- Modal Content -->
+        <div class="p-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
+          
+          <!-- View Mode (Non-Editable) - Layout Otimizado para Leitura -->
+          <!-- View Mode (Non-Editable) - Layout Otimizado para Leitura -->
+          <div v-if="!isEditModeInline" class="space-y-6">
+             <!-- Cabeçalho Visualização (Tags e ID) -->
+             <div class="flex justify-between items-start">
+                <div class="flex-1 mr-4 space-y-2">
+                   <!-- Tags Display -->
+                   <div v-if="selectedEdital.tags && selectedEdital.tags.length" class="flex flex-wrap gap-2">
+                     <span v-for="tag in selectedEdital.tags" :key="tag" class="px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 text-xs rounded-lg border border-blue-100 dark:border-blue-900/30">
+                       #{{ tag }}
+                     </span>
+                   </div>
                 </div>
-
-                <!-- Status Edit -->
-                <div v-if="isEditModeInline">
-                   <select
-                      v-model="editForm.status"
-                      class="px-3 py-1 border border-gray-300 rounded-lg text-sm"
-                    >
-                      <option value="open">Aberto</option>
-                      <option value="closed">Fechado</option>
-                      <option value="analyzing">Em Análise</option>
-                      <option value="draft">Rascunho</option>
-                    </select>
+                <!-- ID Box in View Mode -->
+                <div class="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded text-xs font-mono text-gray-500 font-bold whitespace-nowrap border border-gray-200 dark:border-gray-700">
+                  ID: {{ selectedEdital.numero || 'N/A' }}
                 </div>
-                <Badge v-else :variant="getStatusVariant(selectedEdital.status)" size="lg">
-                  {{ getStatusLabel(selectedEdital.status) }}
-                </Badge>
-              </div>
+             </div>
 
-              <!-- Description Bloc -->
-              <div v-if="isEditModeInline">
-                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
-                   <textarea
-                     v-model="editForm.description"
-                     rows="6"
-                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                   ></textarea>
-              </div>
-              <div v-else class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-800">
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                  {{ selectedEdital.description }}
-                </p>
-              </div>
-            </div>
+             <!-- Descrição -->
+             <div>
+               <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Descrição</h3>
+               <div class="prose dark:prose-invert max-w-none text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
+                 {{ selectedEdital.description }}
+               </div>
+             </div>
 
-            <!-- Files Section (Clean List, Full Width) -->
-            <div>
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
-                <Paperclip class="h-4 w-4" />
-                Arquivos do Edital
-              </h3>
-              
-              <div v-if="selectedEdital.files && selectedEdital.files.length > 0" class="space-y-2">
-                <div 
-                  v-for="file in selectedEdital.files" 
-                  :key="file.id"
-                  class="group flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all"
-                >
-                  <div class="flex items-center gap-3">
-                    <div class="p-2 bg-gray-100 dark:bg-gray-800 rounded group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
-                      <FileText class="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+             <!-- Metadados (Informações Adicionais) -->
+             <div v-if="selectedEdital.metadata && selectedEdital.metadata.filter(m => !['descricao', 'description', 'titulo', 'title'].includes(m.key.toLowerCase())).length > 0" class="pt-4 border-t border-gray-100 dark:border-gray-800">
+                 <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Informações Adicionais</h3>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div v-for="(meta, index) in selectedEdital.metadata.filter(m => !['descricao', 'description', 'titulo', 'title'].includes(m.key.toLowerCase()))" :key="index" class="flex flex-col p-2 bg-gray-50 dark:bg-gray-800/20 rounded border border-gray-100 dark:border-gray-800/50">
+                         <span class="text-[10px] uppercase text-gray-400 font-bold mb-1">{{ meta.key }}</span>
+                         <span class="text-sm font-medium text-gray-900 dark:text-gray-200">{{ meta.value }}</span>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- Files Display View Mode -->
+             <div class="pt-4 border-t border-gray-100 dark:border-gray-800">
+               <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-3 flex items-center gap-2">
+                 <Paperclip class="h-4 w-4" />
+                 Arquivos e Documentos
+               </h3>
+               
+               <div v-if="selectedEdital.files?.length" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Arquivo Principal -->
+                  <a 
+                    v-if="selectedEdital.files.find(f => f.file_type === 'main_pdf')"
+                    :href="selectedEdital.files.find(f => f.file_type === 'main_pdf')?.url"
+                    target="_blank"
+                    class="flex items-center p-3 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-all group col-span-1 sm:col-span-2"
+                  >
+                    <div class="p-2 bg-white dark:bg-gray-800 rounded border border-blue-100 dark:border-blue-900/30 mr-3 shadow-sm">
+                       <FileText class="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                        {{ file.name }}
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ getFileTypeLabel(file.file_type) }}
-                      </p>
+                      <p class="text-sm font-bold text-blue-700 dark:text-blue-300">Arquivo Principal</p>
+                      <p class="text-xs text-blue-600/80 dark:text-blue-400/70 truncate">{{ selectedEdital.files.find(f => f.file_type === 'main_pdf')?.name }}</p>
                     </div>
-                  </div>
-                  
+                  </a>
+
+                  <!-- Anexos -->
                   <a 
-                    v-if="file.url"
+                    v-for="file in selectedEdital.files.filter(f => f.file_type !== 'main_pdf')" 
+                    :key="file.id"
                     :href="file.url"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all shadow-sm"
+                    class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-400 bg-gray-50 dark:bg-gray-800 transition-all group"
                   >
-                    <ExternalLink class="h-3 w-3" />
-                    Visualizar
+                    <div class="p-2 bg-white dark:bg-gray-700 rounded mr-3 shadow-sm">
+                       <FileText class="h-5 w-5 text-gray-400 group-hover:text-blue-500" />
+                    </div>
+                    <div class="overflow-hidden">
+                      <p class="text-sm font-medium truncate text-gray-900 dark:text-gray-100">{{ file.name }}</p>
+                      <p class="text-xs text-gray-500">Anexo</p>
+                    </div>
                   </a>
-                </div>
-              </div>
-              <div v-else class="text-sm text-gray-500 dark:text-gray-400 italic py-4">
-                Nenhum arquivo anexado a este edital.
-              </div>
-            </div>
+               </div>
+               <p v-else class="text-sm text-gray-500 italic">Nenhum arquivo anexado.</p>
+             </div>
           </div>
+
+          <!-- Edit Mode (Compact Grid Layout) -->
+          <div v-else class="grid grid-cols-12 gap-6">
+             <!-- Row 1: Título (Full) -->
+             <div class="col-span-12">
+               <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Título</label>
+               <input v-model="editForm.title" type="text" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 sm:text-sm" />
+             </div>
+
+             <!-- Row 2: Status, Número, Tags -->
+             <div class="col-span-12 md:col-span-3">
+               <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Status</label>
+               <select v-model="editForm.status" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 dark:text-gray-100">
+                  <option value="open">Aberto</option>
+                  <option value="analyzing">Em Análise</option>
+                  <option value="closed">Encerrado</option>
+                  <option value="draft">Rascunho</option>
+                  <option v-if="!['open', 'analyzing', 'closed', 'draft'].includes(editForm.status)" :value="editForm.status">{{ editForm.status }}</option>
+               </select>
+             </div>
+
+             <div class="col-span-12 md:col-span-3">
+               <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ID</label>
+               <input v-model="editForm.numero" disabled placeholder="Ex: 01/2024" class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-0 text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed" />
+             </div>
+
+             <div class="col-span-12 md:col-span-6">
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Tags</label>
+                <input v-model="editForm.tags" placeholder="Separe por vírgula" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 dark:text-gray-100" />
+             </div>
+
+             <!-- Row 3: Descrição -->
+             <div class="col-span-12">
+               <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Descrição</label>
+               <textarea v-model="editForm.description" rows="3" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 dark:text-gray-100 resize-none"></textarea>
+             </div>
+
+             <!-- Row Extra: Metadata (Informações Adicionais) -->
+             <div class="col-span-12" v-if="editForm.metadata.filter(m => !['descricao', 'description', 'titulo', 'title'].includes(m.key.toLowerCase())).length > 0">
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Informações Adicionais</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-gray-800/20 rounded border border-gray-200 dark:border-gray-700">
+                   <div 
+                     v-for="(meta, index) in editForm.metadata.filter(m => !['descricao', 'description', 'titulo', 'title'].includes(m.key.toLowerCase()))" 
+                     :key="index" 
+                     class="flex flex-col"
+                   >
+                      <label class="text-[10px] text-gray-400 uppercase font-bold mb-1">{{ meta.key }}</label>
+                      <input v-model="meta.value" class="px-2 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100" />
+                   </div>
+                </div>
+             </div>
+
+             <!-- SEÇÃO 1: Arquivo do Edital (Principal - Único) -->
+             <div class="col-span-12 md:col-span-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+               <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Arquivo Principal</label>
+               
+               <div class="bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-lg p-3 min-h-[120px] flex flex-col justify-center transition-colors">
+                  <!-- Estado: Arquivo Selecionado ou Existente -->
+                  <div class="flex items-center justify-between gap-3">
+                     <div class="flex items-center gap-3 overflow-hidden flex-1">
+                        <div class="p-2 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 shadow-sm flex-shrink-0">
+                           <FileText class="h-6 w-6 text-blue-500 dark:text-blue-400" />
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                           <span v-if="editForm.mainPDF" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Novo Selecionado</span>
+                           <span v-else-if="existingMainFile" class="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider">Atual</span>
+                           <span v-else class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pendente</span>
+                           
+                           <!-- Link para arquivo existente -->
+                           <a 
+                             v-if="existingMainFile && !editForm.mainPDF"
+                             :href="existingMainFile.url"
+                             target="_blank"
+                             class="text-sm font-medium truncate text-blue-600 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
+                             :title="existingMainFile.name"
+                           >
+                             {{ existingMainFile.name }}
+                             <ExternalLink class="h-3 w-3" />
+                           </a>
+                           <!-- Texto para novo arquivo ou vazio -->
+                           <span v-else class="text-sm font-medium truncate text-gray-900 dark:text-gray-100" :title="editForm.mainPDF ? editForm.mainPDF.name : ''">
+                              {{ editForm.mainPDF ? editForm.mainPDF.name : 'Nenhum arquivo carregado' }}
+                           </span>
+                        </div>
+                     </div>
+                     
+                     <!-- Botão de Ação -->
+                     <label class="cursor-pointer shrink-0 px-3 py-1.5 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all flex items-center gap-2">
+                        <Upload class="h-3 w-3" />
+                         {{ editForm.mainPDF || existingMainFile ? 'Trocar' : 'Carregar' }}
+                        <input type="file" class="hidden" @change="(e) => handleReplaceMain(e)" />
+                     </label>
+                  </div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 px-1">Este é o documento principal do edital.</p>
+               </div>
+             </div>
+
+             <!-- SEÇÃO 2: Anexos (Múltiplos) -->
+             <div class="col-span-12 md:col-span-6 pt-6 border-t border-gray-100 dark:border-gray-800 md:border-t-0 md:border-l md:pl-8">
+               <div class="flex justify-between items-center mb-2">
+                 <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Anexos e Documentos</label>
+                 <label class="cursor-pointer flex items-center gap-1.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors border border-blue-100 dark:border-blue-900/30">
+                    <Plus class="h-3 w-3" /> ADICIONAR
+                    <input type="file" multiple class="hidden" @change="handleInlineFileUpload" />
+                 </label>
+               </div>
+
+
+               <div class="bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700 p-2 min-h-[200px] max-h-[300px] overflow-y-auto custom-scrollbar">
+                  <!-- Lista Vazia -->
+                  <div v-if="editForm.newAnnexes.length === 0 && existingAnnexes.length === 0" class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-2">
+                     <span class="text-xs italic">Nenhum anexo adicional.</span>
+                  </div>
+
+                  <!-- Lista de Novos -->
+                  <div v-for="(annex, index) in editForm.newAnnexes" :key="'new-'+index" class="flex items-center justify-between p-2 mb-2 bg-white dark:bg-gray-900/50 border border-green-200 dark:border-green-800/50 rounded-md shadow-sm">
+                     <div class="flex items-center gap-2 overflow-hidden">
+                        <Badge variant="outline" class="text-[9px] px-1 py-0 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">NOVO</Badge>
+                        <span class="text-xs font-medium truncate text-gray-700 dark:text-gray-200" :title="annex.name">{{ annex.name }}</span>
+                     </div>
+                     <button @click="removeNewAnnex(index)" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Remover">
+                        <X class="h-3 w-3" />
+                     </button>
+                  </div>
+                  
+                  <!-- Lista de Existentes -->
+                  <div v-for="file in existingAnnexes" :key="file.id" class="flex items-center justify-between p-2 mb-2 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
+                     <div class="flex items-center gap-2 overflow-hidden">
+                        <FileText class="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                        <span class="text-xs font-medium truncate text-gray-700 dark:text-gray-200" :title="file.name">{{ file.name }}</span>
+                     </div>
+                     <button @click="markAnnexDeleted(file.id)" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Excluir Anexo">
+                        <Trash2 class="h-3 w-3" />
+                     </button>
+                  </div>
+               </div>
+             </div>
+          </div>
+
         </div>
-
-
 
     <!-- Modal Footer -->
     <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -428,8 +530,29 @@
             Fechar
           </Button>
           
+          <!-- Mostrar botões de Salvar/Cancelar quando em modo de edição -->
+          <template v-if="isEditModeInline">
+            <Button 
+              variant="outline"
+              @click="cancelEdit"
+              :disabled="isSaving"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              @click="saveEditalInline"
+              :disabled="isSaving"
+              class="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
+            >
+              <Save class="h-4 w-4" />
+              {{ isSaving ? 'Salvando...' : 'Salvar Alterações' }}
+            </Button>
+          </template>
+          
+          <!-- Mostrar botão Editar quando NÃO estiver em modo de edição -->
           <Button 
-            @click="navigateToEdit(selectedEdital.id)" 
+            v-else
+            @click="enterEditMode" 
             class="gap-2 bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md hover:shadow-lg transition-all"
           >
             <Edit class="h-4 w-4" />
@@ -471,7 +594,8 @@ import {
   ChevronRight,
   ExternalLink,
   Save,
-  Trash2
+  Trash2,
+  Upload
 } from 'lucide-vue-next'
 
 // Local Interface
@@ -480,6 +604,8 @@ interface Edital {
   title: string
   description: string
   status: 'open' | 'closed' | 'analyzing' | 'draft'
+  numero?: string  // Número do edital (ex: 01/2024)
+  tags?: string[]  // Tags do edital
   created_at: string
   updated_at: string
   metadata_count: number
@@ -507,7 +633,28 @@ const editForm = ref({
   title: '',
   description: '',
   status: 'open',
+  tags: '',
+  numero: '',
+  mainPDF: null as { name: string, file: File } | null,
+  newAnnexes: [] as Array<{ name: string, file: File }>,
+  deletedAnnexIds: [] as string[],
   metadata: [] as Array<{ id?: string; key: string; value: string }>
+})
+
+// Helper para verificar arquivo existente
+const existingMainFile = computed(() => {
+  if (!selectedEdital.value || !selectedEdital.value.files) return null
+  return selectedEdital.value.files.find(f => f.file_type === 'main_pdf') || null
+})
+
+// Helper para outros anexos existentes
+const existingAnnexes = computed(() => {
+  if (!selectedEdital.value || !selectedEdital.value.files) return []
+  // Filtra tudo que NÃO for main_pdf E que NÃO esteja na lista de deletados
+  return selectedEdital.value.files.filter(f => 
+    f.file_type !== 'main_pdf' && 
+    !editForm.value.deletedAnnexIds.includes(f.id)
+  )
 })
 
 const navigateTo = (path: string) => {
@@ -520,11 +667,72 @@ const navigateToEdit = (id: string) => {
   router.push({ name: 'management-edit', params: { id } }) 
 }
 
+const mapApiToEdital = (api: any): Edital => {
+    console.log('🔍 mapApiToEdital - Dados recebidos da API:', api)
+    
+    let mainFileObj: any = null;
+    let annexesList: any[] = [];
+    
+    const directMainUrl = api.arquivo || api.url || api.file;
+    console.log('📁 Arquivo principal detectado:', directMainUrl)
+    
+    if (directMainUrl) {
+       mainFileObj = { 
+          id: `${api.id}-main`, 
+          name: directMainUrl.split('/').pop() || 'arquivo_principal', 
+          url: directMainUrl, 
+          file_type: 'main_pdf' 
+       };
+       annexesList = api.arquivos || [];
+       console.log('✅ Arquivo principal definido:', mainFileObj)
+    } else if (api.arquivos && api.arquivos.length > 0) {
+       const first = api.arquivos[0];
+       mainFileObj = {
+          id: first.id?.toString() || `${api.id}-main-promoted`,
+          name: first.nome || first.arquivo?.split('/').pop() || 'arquivo_principal.pdf',
+          url: first.arquivo,
+          file_type: 'main_pdf'
+       };
+       annexesList = api.arquivos.slice(1);
+       console.log('📌 Primeiro anexo promovido a principal:', mainFileObj)
+    } else {
+       console.log('⚠️ Nenhum arquivo encontrado')
+    }
+    
+    const mappedEdital = {
+      ...api,
+      id: api.id?.toString() || '',
+      title: api.nome || 'Sem título',
+      description: api.metadata?.descricao || '',
+      status: (api.status?.toLowerCase() || 'draft') as any,
+      numero: api.numero || '',
+      tags: api.tags || [],
+      metadata_count: api.metadata ? Object.keys(api.metadata).length : 0,
+      files_count: (mainFileObj ? 1 : 0) + annexesList.length,
+      metadata: api.metadata ? Object.entries(api.metadata).map(([key, value]: any, i:number) => ({
+        id: `${api.id}-${i}`, key, value: String(value)
+      })) : [],
+      files: [
+        ...(mainFileObj ? [mainFileObj] : []),
+        ...annexesList.map((a: any, i: number) => ({ 
+            id: a.id?.toString() || `${api.id}-${i}`, 
+            name: a.nome || a.arquivo?.split('/').pop() || `anexo-${i}.pdf`, 
+            url: a.arquivo || '', 
+            file_type: 'annexe' 
+        }))
+      ]
+    } as Edital
+    
+    console.log('✨ Edital mapeado:', mappedEdital)
+    return mappedEdital
+}
+
 const loadEditais = async () => {
   isLoadingEditais.value = true
   try {
     const response = await editalService.getEditals()
-    editais.value = response as any as Edital[]
+    // Mapeia os dados da API para a estrutura esperada usando o helper padronizado
+    editais.value = response.map(mapApiToEdital)
   } catch (error) {
     console.error('Erro ao carregar editais:', error)
     uiStore.showToast({
@@ -588,10 +796,14 @@ const clearFilters = () => {
   currentPage.value = 1
 }
 
+
 const openEditalModal = async (edital: any) => {
   try {
-    const fullEdital = await editalService.getEdital(edital.id)
-    selectedEdital.value = fullEdital as any as Edital // Cast to local type
+    const apiEdital: any = await editalService.getEdital(edital.id)
+    
+    // Mapear os dados da API para a estrutura local usando helper padronizado
+    selectedEdital.value = mapApiToEdital(apiEdital)
+    
     isEditModeInline.value = false // Reset mode
   } catch (error) {
     console.error('Erro ao carregar detalhes do edital:', error)
@@ -611,65 +823,144 @@ const closeEditalModal = () => {
 const enterEditMode = () => {
   if (!selectedEdital.value) return
   
+  // Helper: Garantir que metadata seja sempre array
+  const getMetadataArray = () => {
+    if (!selectedEdital.value?.metadata) return []
+    if (Array.isArray(selectedEdital.value.metadata)) {
+      return selectedEdital.value.metadata.map(m => ({ key: m.key, value: m.value }))
+    }
+    // Se metadata é objeto, converter para array
+    return Object.entries(selectedEdital.value.metadata)
+      .filter(([key]) => key !== 'descricao') // descricao já está em description
+      .map(([key, value]) => ({ key, value: String(value) }))
+  }
+  
   editForm.value = {
     title: selectedEdital.value.title,
     description: selectedEdital.value.description,
     status: selectedEdital.value.status,
-    metadata: selectedEdital.value.metadata ? selectedEdital.value.metadata.map(m => ({ key: m.key, value: m.value })) : []
+    tags: (selectedEdital.value as any).tags?.join(',') || '',
+    numero: (selectedEdital.value as any).numero || '',
+    mainPDF: null,
+    newAnnexes: [],
+    deletedAnnexIds: [],
+    metadata: getMetadataArray()
   }
   isEditModeInline.value = true
+}
+
+const cancelEdit = () => {
+  isEditModeInline.value = false
+  // Resetar o formulário para os valores originais
+  if (selectedEdital.value) {
+    editForm.value = {
+      title: selectedEdital.value.title,
+      description: selectedEdital.value.description,
+      status: selectedEdital.value.status,
+      tags: (selectedEdital.value as any).tags?.join(',') || '',
+      numero: (selectedEdital.value as any).numero || '',
+      mainPDF: null,
+      newAnnexes: [],
+      deletedAnnexIds: [],
+      metadata: []
+    }
+  }
+}
+
+const handleReplaceMain = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0]
+    editForm.value.mainPDF = { name: file.name, file: file }
+  }
+}
+
+const handleInlineFileUpload = (event: Event) => {
+  // Alias para adicionar novos anexos (múltiplos)
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    Array.from(input.files).forEach(file => {
+        editForm.value.newAnnexes.push({ name: file.name, file: file })
+    })
+  }
+}
+
+const removeNewAnnex = (index: number) => {
+    editForm.value.newAnnexes.splice(index, 1)
+}
+
+const markAnnexDeleted = (id: string) => {
+    editForm.value.deletedAnnexIds.push(id)
 }
 
 const saveEditalInline = async () => {
   if (!selectedEdital.value) return
   
+  console.log('💾 Iniciando salvamento do edital...')
+  console.log('📋 Dados do formulário:', editForm.value)
+  
   isSaving.value = true
   try {
-    const payload = {
+    const formData: any = {
       title: editForm.value.title,
       description: editForm.value.description,
       status: editForm.value.status as any,
-      dynamicFields: editForm.value.metadata.filter(m => m.key && m.value), // Assuming backend adapts this
-      // For minimal update, we might need to send everything or just changed fields depending on API
-      // Assuming create/update payload structure. 
-      // Important: `dynamicFields` mapping might differ from `metadata`. 
-      // Usually `dynamicFields` is what createEdital expects. 
+      numero: editForm.value.numero, 
+      tags: editForm.value.tags,
+      mainPDF: editForm.value.mainPDF, // Arquivo para upload
+      dynamicFields: editForm.value.metadata.map(m => ({
+        id: m.id || `temp-${Math.random()}`,
+        key: m.key,
+        value: m.value
+      })),
+      // TODO: Adicionar lógica de anexos extras aqui quando backend suportar
+      // annexes: editForm.value.newAnnexes.map(a => a.file),
+      // deletedAnnexes: editForm.value.deletedAnnexIds
+      annexes: [], 
       results: []
     }
-
-// ...
-    await editalService.updateEdital(selectedEdital.value.id, {
-        ...payload,
-        dynamicFields: editForm.value.metadata
-            .filter(m => m.key && m.value)
-            .map((m, i) => ({ ...m, id: m.id || `temp-inline-${i}` })), // Fix: Ensure ID exists
-        mainPDF: null, 
-        annexes: []
-    })
     
-// ...
+    console.log('📤 Enviando para API:', formData)
+    console.log('🆔 ID do edital:', selectedEdital.value.id)
     
-    // Update local data
-    selectedEdital.value.title = editForm.value.title
-    selectedEdital.value.description = editForm.value.description
-    selectedEdital.value.status = editForm.value.status as any
-    // Metadata update locally might be complex if IDs change, but for display:
-    // selectedEdital.value.metadata = ... (we would need response to get new IDs)
-    // Simpler: reload edital details
-    const refreshed = await editalService.getEdital(selectedEdital.value.id)
-    selectedEdital.value = refreshed as any as Edital
+    // O service updateEdital foi atualizado para aceitar formData com mainPDF
+    const updated = await editalService.updateEdital(selectedEdital.value.id, formData)
     
-    // Also update list item locally to reflect changes immediately
-    const listIndex = editais.value.findIndex(e => e.id === selectedEdital.value?.id)
-    if (listIndex !== -1) {
-       editais.value[listIndex] = { ...editais.value[listIndex], ...editForm.value } as Edital
+    console.log('✅ Resposta da API:', updated)
+    
+    // Atualiza a visualização local com os dados retornados
+    const api = updated
+    selectedEdital.value = {
+       ...selectedEdital.value,
+       title: api.nome || editForm.value.title,
+       description: api.metadata?.descricao || editForm.value.description,
+       status: (api.status?.toLowerCase() || 'draft') as any,
+       numero: api.numero || editForm.value.numero,
+       tags: api.tags || [],
+       files: [
+        ...(api.arquivo ? [{ id: `${api.id}-main`, name: api.arquivo.split('/').pop() || 'arquivo.pdf', url: api.arquivo, file_type: 'main_pdf' }] : []),
+        ...(api.arquivos?.map((a: any, i: number) => ({ id: a.id?.toString() || `${api.id}-${i}`, name: a.nome || a.arquivo?.split('/').pop() || `anexo-${i}.pdf`, url: a.arquivo || '', file_type: 'annexe' })) || [])
+      ]
     }
-
-    uiStore.showToast({ type: 'success', message: 'Edital atualizado com sucesso' })
+    
+    // Atualiza a lista principal
+    const index = editais.value.findIndex(e => e.id === selectedEdital.value?.id)
+    if (index !== -1 && selectedEdital.value) {
+       editais.value[index] = { ...selectedEdital.value }
+    }
+    
+    uiStore.showToast({
+      type: 'success',
+      message: 'Edital atualizado com sucesso!'
+    })
     isEditModeInline.value = false
-
   } catch (error) {
-    console.error('Erro ao salvar:', error)
+    console.error('❌ Erro ao salvar edital:', error)
+    console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2))
+    uiStore.showToast({
+      type: 'error',
+      message: 'Erro ao salvar alterações'
+    })
   } finally {
     isSaving.value = false
   }
@@ -703,8 +994,11 @@ const executeDelete = async () => {
 const getStatusVariant = (status: string) => {
   const variants: Record<string, string> = {
     open: 'success',
+    aberto: 'success',
     closed: 'destructive',
+    encerrado: 'destructive',
     analyzing: 'warning',
+    em_andamento: 'warning',
     draft: 'default'
   }
   return variants[status] || 'default'
@@ -713,8 +1007,11 @@ const getStatusVariant = (status: string) => {
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
     open: 'Aberto',
+    aberto: 'Aberto',
     closed: 'Fechado',
+    encerrado: 'Fechado',
     analyzing: 'Em Análise',
+    em_andamento: 'Em Análise',
     draft: 'Rascunho'
   }
   return labels[status] || status
