@@ -74,115 +74,101 @@ export const editalService = {
   async createEdital(formData: EditalFormData): Promise<EditalResponse> {
     console.log('📝 Criando edital...')
 
-    // Verifica se há arquivo principal para decidir entre JSON e FormData
-    // Nota: O backend espera 'arquivo' no multipart. 
-    // Mesmo sem arquivo, vamos usar FormData para padronizar se possível, ou manter a lógica dual.
-    // Como backend aceita JSON também, mantemos dual, mas corrigimos os nomes dos campos.
+    let edital: EditalResponse
 
-    if (formData.mainPDF) {
-      console.log('📂 Detectado arquivo principal, usando FormData...')
-
+    // Passo 1: Criação Básica (Com ou Sem Arquivo)
+    // Se tiver arquivo, usamos FormData mas SEM metadata/tags complexos para evitar erro 400
+    if (formData.mainPDF && formData.mainPDF.file) {
+      console.log('📂 Passo 1: Upload Arquivo Principal via FormData...')
       const form = new FormData()
-
-      // Mapeamento correto para o backend controlpanel (Model Edital/ItemConhecimento)
-      form.append('nome', formData.title) // Backend usa 'nome'
-      form.append('numero', formData.numero) // Backend tem campo 'numero'
-
+      form.append('nome', formData.title)
+      form.append('numero', formData.numero)
       const statusMap: Record<string, string> = {
-        'open': 'ABERTO',
-        'closed': 'ENCERRADO',
-        'analyzing': 'EM_ANDAMENTO',
-        'draft': 'ABERTO'
+        'open': 'ABERTO', 'closed': 'ENCERRADO', 'analyzing': 'EM_ANDAMENTO', 'draft': 'ABERTO'
       }
       form.append('status', statusMap[formData.status || 'open'] || 'ABERTO')
+      form.append('arquivo', formData.mainPDF.file)
 
-      // Arquivo principal
-      if (formData.mainPDF.file) {
-        form.append('arquivo', formData.mainPDF.file) // Backend usa 'arquivo'
-        // form.append('main_pdf_display_name', formData.mainPDF.name) // Desnecessário no backend real
-      } else {
-        console.warn('⚠️ mainPDF está definido mas sem o objeto File (blob) interno!')
-      }
-
-      // Tags (ArrayField no Django)
+      // Enviamos metadata e tags básicos para evitar erro 400 se o backend esperar
+      form.append('metadata', '{}')
       if (formData.tags) {
-        // Enviar como string separada por vírgula pode funcionar se o DRF/Django converter,
-        // mas para ArrayField via FormData, melhor enviar múltiplos valores
         const tagsList = formData.tags.split(',').map(t => t.trim()).filter(t => t)
         tagsList.forEach(tag => {
           form.append('tags', tag)
         })
       }
 
-      // Metadata (backend espera JSON no campo 'metadata')
-      const metadataObj: Record<string, string> = {
-        descricao: formData.description // Backend não tem campo 'description' direto no ItemConhecimento, salvamos no metadata
-      }
-
-      formData.dynamicFields.forEach(field => {
-        if (field.key && field.value) {
-          metadataObj[field.key] = field.value
-        }
-      })
-
-      form.append('metadata', JSON.stringify(metadataObj))
-
-      console.log('📝 Enviando FormData...')
-      const edital = await apiClient.post<EditalResponse>('/edital/edital/', form)
-      console.log('✅ Edital criado com arquivo:', edital)
-      return edital
+      // Enviamos apenas o básico para criar o ID e salvar o arquivo
+      edital = await apiClient.post<EditalResponse>('/edital/edital/', form)
 
     } else {
-      // Sem arquivos, usa JSON
-      console.log('📝 Sem arquivos, criando via JSON...')
-
-      // Precisamos adaptar o payload JSON também para os campos corretos
-      // O formatPayload original talvez esteja gerando campos errados?
-      // Vamos fazer manual aqui para garantir
-
+      console.log('📝 Passo 1: Criação Básica via JSON...')
       const payload = {
         nome: formData.title,
         numero: formData.numero,
         status: this.mapStatus(formData.status),
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
-        metadata: {
-          descricao: formData.description,
-          ...formData.dynamicFields.reduce((acc, field) => ({ ...acc, [field.key]: field.value }), {})
+        // Envia vazio e atualiza no passo 2 para consistência
+        tags: [],
+        metadata: {}
+      }
+      edital = await apiClient.post<EditalResponse>('/edital/edital/', payload)
+    }
+
+    console.log('✅ Edital criado (ID):', edital.id)
+
+    // Passo 2: Atualizar Metadata e Tags via JSON (PATCH)
+    // Garantimos que estruturas complexas sejam salvas corretamente
+    console.log('📝 Passo 2: Atualizando Metadados e Tags via JSON...')
+    const metadataObj: Record<string, string> = {
+      descricao: formData.description
+    }
+    formData.dynamicFields.forEach(field => {
+      if (field.key && field.value) {
+        metadataObj[field.key] = field.value
+      }
+    })
+
+    const updatePayload = {
+      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+      metadata: metadataObj
+    }
+
+    edital = await apiClient.patch<EditalResponse>(`/edital/edital/${edital.id}/`, updatePayload)
+
+    // Passo 3: Upload de Anexos
+    if (formData.annexes && formData.annexes.length > 0) {
+      console.log('📎 Passo 3: Enviando Anexos...')
+      for (const annex of formData.annexes) {
+        if (annex.file) {
+          try {
+            const annexForm = new FormData()
+            annexForm.append('item', edital.id.toString()) // FK para o Edital
+            annexForm.append('arquivo', annex.file)
+            annexForm.append('nome', annex.displayName || annex.name)
+
+            await apiClient.post('/anexo/', annexForm)
+            console.log('   ✅ Anexo enviado:', annex.name)
+          } catch (err) {
+            console.error('   ❌ Falha ao enviar anexo:', annex.name, err)
+          }
         }
       }
-
-      console.log('📝 Enviando JSON:', payload)
-      const edital = await apiClient.post<EditalResponse>('/edital/edital/', payload)
-      console.log('✅ Edital criado:', edital)
-      return edital
     }
+
+    return edital
   },
 
   async updateEdital(id: string, formData: EditalFormData): Promise<EditalResponse> {
     console.log('📝 Atualizando edital:', id)
 
-    // Verifica se há NOVO arquivo principal (tem propriedade .file)
+    // Passo 1: Atualização de Arquivo (se houver novo)
     if (formData.mainPDF && formData.mainPDF.file) {
-      console.log('📂 Detectado NOVO arquivo principal na edição, usando FormData...')
-
+      console.log('📂 Passo 1: Atualizando Arquivo Principal via PATCH (FormData)...')
       const form = new FormData()
+      form.append('arquivo', formData.mainPDF.file)
 
-      form.append('nome', formData.title)
-      // numero é imutável geralmente, mas se quiser permitir editar, descomente:
-      // form.append('numero', formData.numero) 
-
-      const statusMap: Record<string, string> = {
-        'open': 'ABERTO',
-        'closed': 'ENCERRADO',
-        'analyzing': 'EM_ANDAMENTO',
-        'draft': 'ABERTO'
-      }
-      form.append('status', statusMap[formData.status || 'open'] || 'ABERTO')
-
-      // Novo Arquivo principal
-      form.append('arquivo', formData.mainPDF.file) // Backend usa 'arquivo'
-
-      // Tags
+      // Enviamos metadata e tags básicos para evitar erro 400 se o backend esperar
+      form.append('metadata', '{}')
       if (formData.tags) {
         const tagsList = formData.tags.split(',').map(t => t.trim()).filter(t => t)
         tagsList.forEach(tag => {
@@ -190,36 +176,51 @@ export const editalService = {
         })
       }
 
-      // Metadata 
-      const metadataObj: Record<string, string> = {
-        descricao: formData.description
-      }
-      formData.dynamicFields.forEach(field => {
-        if (field.key && field.value) {
-          metadataObj[field.key] = field.value
-        }
-      })
-
-      form.append('metadata', JSON.stringify(metadataObj))
-
-      console.log('📝 Enviando FormData (PUT)...')
-      return apiClient.put<EditalResponse>(`/edital/edital/${id}/`, form)
-    } else {
-      // JSON Update
-      const payload = {
-        nome: formData.title,
-        // numero: formData.numero, // Mantemos imutável no JSON também
-        status: this.mapStatus(formData.status),
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
-        metadata: {
-          descricao: formData.description,
-          ...formData.dynamicFields.reduce((acc, field) => ({ ...acc, [field.key]: field.value }), {})
-        }
-      }
-
-      console.log('📝 Atualizando edital via JSON:', payload)
-      return apiClient.put(`/edital/edital/${id}/`, payload)
+      await apiClient.patch(`/edital/edital/${id}/`, form)
     }
+
+    // Passo 2: Atualização de Dados (JSON)
+    console.log('📝 Passo 2: Atualizando Dados via JSON...')
+    const metadataObj: Record<string, string> = {
+      descricao: formData.description
+    }
+    formData.dynamicFields.forEach(field => {
+      if (field.key && field.value) {
+        metadataObj[field.key] = field.value
+      }
+    })
+
+    const payload = {
+      nome: formData.title,
+      // numero: formData.numero, // Geralmente não se altera numero
+      status: this.mapStatus(formData.status),
+      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+      metadata: metadataObj
+    }
+
+    const edital = await apiClient.patch<EditalResponse>(`/edital/edital/${id}/`, payload)
+
+    // Passo 3: Novos Anexos
+    if (formData.annexes && formData.annexes.length > 0) {
+      console.log('📎 Passo 3: Enviando Novos Anexos...')
+      for (const annex of formData.annexes) {
+        if (annex.file && !annex.id?.toString().startsWith('server-')) { // Apenas novos (temp id)
+          try {
+            const annexForm = new FormData()
+            annexForm.append('item', id)
+            annexForm.append('arquivo', annex.file)
+            annexForm.append('nome', annex.displayName || annex.name)
+
+            await apiClient.post('/anexo/', annexForm)
+            console.log('   ✅ Anexo enviado:', annex.name)
+          } catch (err) {
+            console.error('   ❌ Falha ao enviar anexo:', annex.name, err)
+          }
+        }
+      }
+    }
+
+    return edital
   },
 
   mapStatus(status: string): string {
@@ -243,7 +244,7 @@ export const editalService = {
         total: number
       }
       data: EditalResponse[]
-    }>('/edital/edital/')
+    }>('/edital/edital/?ordering=-id')
 
     console.log('✅ Editais recebidos:', response.data?.length || 0)
     return response.data || []

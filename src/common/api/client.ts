@@ -13,7 +13,7 @@ class ApiClient {
 
     this.instance = axios.create({
       baseURL,
-      timeout: 10000,
+      timeout: 60000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,6 +31,10 @@ class ApiClient {
 
         if (token) {
           config.headers.Authorization = `Token ${token}`
+        }
+
+        if (config.data instanceof FormData || (config.data && config.data.constructor && config.data.constructor.name === 'FormData')) {
+          delete config.headers['Content-Type']
         }
 
         return config
@@ -138,6 +142,11 @@ class ApiClient {
 
   async uploadFile(url: string, formData: FormData): Promise<any> {
     const response = await this.instance.post(url, formData)
+    return response.data
+  }
+
+  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.instance.patch<T>(url, data, config)
     return response.data
   }
 

@@ -670,27 +670,42 @@ const navigateToEdit = (id: string) => {
 const mapApiToEdital = (api: any): Edital => {
     console.log('🔍 mapApiToEdital - Dados recebidos da API:', api)
     
+    // Base URL configuration - Centralized
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002';
+
+    // Helper to normalize URLs
+    const normalizeUrl = (url: string | null | undefined) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        // Ensure not double slash if api returns /media and base has /
+        const cleanBase = API_BASE_URL.replace(/\/$/, '');
+        const cleanPath = url.startsWith('/') ? url : `/${url}`;
+        return `${cleanBase}${cleanPath}`;
+    };
+
     let mainFileObj: any = null;
     let annexesList: any[] = [];
     
-    const directMainUrl = api.arquivo || api.url || api.file;
+    // Logic 1: Direct 'arquivo' field (Backend standard)
+    const directMainUrl = api.arquivo;
     console.log('📁 Arquivo principal detectado:', directMainUrl)
     
     if (directMainUrl) {
        mainFileObj = { 
           id: `${api.id}-main`, 
           name: directMainUrl.split('/').pop() || 'arquivo_principal', 
-          url: directMainUrl, 
+          url: normalizeUrl(directMainUrl), 
           file_type: 'main_pdf' 
        };
        annexesList = api.arquivos || [];
        console.log('✅ Arquivo principal definido:', mainFileObj)
     } else if (api.arquivos && api.arquivos.length > 0) {
+       // Logic 2: Fallback to first item in 'arquivos' list if 'arquivo' is empty (Legacy or alternative structure)
        const first = api.arquivos[0];
        mainFileObj = {
           id: first.id?.toString() || `${api.id}-main-promoted`,
           name: first.nome || first.arquivo?.split('/').pop() || 'arquivo_principal.pdf',
-          url: first.arquivo,
+          url: normalizeUrl(first.arquivo),
           file_type: 'main_pdf'
        };
        annexesList = api.arquivos.slice(1);
@@ -717,7 +732,7 @@ const mapApiToEdital = (api: any): Edital => {
         ...annexesList.map((a: any, i: number) => ({ 
             id: a.id?.toString() || `${api.id}-${i}`, 
             name: a.nome || a.arquivo?.split('/').pop() || `anexo-${i}.pdf`, 
-            url: a.arquivo || '', 
+            url: normalizeUrl(a.arquivo), 
             file_type: 'annexe' 
         }))
       ]

@@ -149,8 +149,8 @@
             </div>
 
             <!-- State A: Upload Zone (No File) -->
-            <div
-              v-if="uploadedFiles.length === 0"
+              <div
+              v-if="uploadedFiles.length === 0 && !existingFileUrl"
               @drop.prevent="handleDrop"
               @dragover.prevent
               @dragenter="isDragging = true"
@@ -176,8 +176,8 @@
                 <div class="flex items-center gap-3">
                   <FileText class="h-5 w-5 text-blue-600" />
                   <div>
-                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ uploadedFiles[0].name }}</p>
-                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatFileSize(uploadedFiles[0].size) }}</p>
+                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ uploadedFiles.length > 0 ? uploadedFiles[0].name : existingFileName }}</p>
+                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ uploadedFiles.length > 0 ? formatFileSize(uploadedFiles[0].size) : 'Arquivo existente' }}</p>
                   </div>
                 </div>
                 <Button variant="outline" size="sm" @click="clearFile" class="gap-2 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20">
@@ -234,7 +234,7 @@
                        </div>
 
                        <!-- File Selection -->
-                       <div v-if="!item.file" class="flex items-center justify-center px-6 py-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" @click="triggerItemFileInput(index)">
+                       <div v-if="!item.file && !item.serverUrl" class="flex items-center justify-center px-6 py-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" @click="triggerItemFileInput(index)">
                          <div class="space-y-1 text-center">
                            <Upload class="mx-auto h-8 w-8 text-gray-400" />
                            <div class="flex text-sm text-gray-600 dark:text-slate-400">
@@ -254,11 +254,11 @@
                               <FileText class="h-5 w-5 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
-                               <p class="text-sm font-medium text-blue-900 dark:text-blue-100 truncate max-w-[200px]">{{ item.file.name }}</p>
-                               <p class="text-xs text-blue-600 dark:text-blue-300">{{ formatFileSize(item.file.size) }}</p>
+                               <p class="text-sm font-medium text-blue-900 dark:text-blue-100 truncate max-w-[200px]">{{ item.file ? item.file.name : item.displayName }}</p>
+                               <p class="text-xs text-blue-600 dark:text-blue-300">{{ item.file ? formatFileSize(item.file.size) : 'Arquivo existente' }}</p>
                             </div>
                           </div>
-                          <button @click="item.file = null" class="text-xs text-red-600 hover:text-red-800 underline">Trocar</button>
+                          <button @click="clearAttachmentFile(index)" class="text-xs text-red-600 hover:text-red-800 underline">Trocar</button>
                        </div>
                     </div>
 
@@ -317,6 +317,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ item.displayName || 'Sem nome' }}</p>
                         <p v-if="item.file" class="text-xs text-gray-500">{{ item.file.name }}</p>
+                        <p v-else-if="item.serverUrl" class="text-xs text-blue-600 dark:text-blue-400">Arquivo carregado</p>
                         <p v-else class="text-xs text-red-500">Arquivo pendente</p>
                     </div>
                   </div>
@@ -400,9 +401,12 @@ interface AttachmentItem {
   id: string
   file: File | null
   displayName: string
+  serverUrl?: string
 }
 const attachmentItems = ref<AttachmentItem[]>([]) 
 const previewUrl = ref<string | null>(null)
+const existingFileUrl = ref<string | null>(null)
+const existingFileName = ref<string>('')
 const errors = ref({ numero: '', title: '', description: '' })
 const itemInputRefs = ref<Record<number, HTMLInputElement>>({})
 
@@ -441,9 +445,36 @@ const loadEditalData = async (id: string) => {
       value: String(meta[key])
     }))
 
-    // TODO: Carregar arquivos existentes (Isso requer que o backend envie URLs)
-    // Por enquanto, arquivos não são pré-carregados visualmente como File objects
-    // mas poderiam ser mostrados em lista separada "Arquivos Atuais"
+    // Arquivo principal
+    if (edital.arquivo) {
+       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002'
+       let fileUrl = edital.arquivo
+       if (fileUrl.startsWith('/') && !fileUrl.startsWith('http')) {
+           fileUrl = `${baseUrl}${fileUrl}`
+       }
+       
+       existingFileUrl.value = fileUrl
+       previewUrl.value = fileUrl
+       // Tenta extrair nome do arquivo
+       existingFileName.value = edital.arquivo.split('/').pop() || 'Arquivo Principal'
+    }
+
+    // Anexos
+    if (edital.arquivos && Array.isArray(edital.arquivos)) {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002'
+        attachmentItems.value = edital.arquivos.map((anexo: any) => {
+             let fileUrl = anexo.arquivo
+             if (fileUrl && fileUrl.startsWith('/') && !fileUrl.startsWith('http')) {
+                 fileUrl = `${baseUrl}${fileUrl}`
+             }
+             return {
+                id: `server-${anexo.id}`,
+                file: null,
+                displayName: anexo.nome || (anexo.arquivo ? anexo.arquivo.split('/').pop() : 'Anexo'),
+                serverUrl: fileUrl
+             }
+        })
+    }
     
   } catch (error) {
     console.error('Erro ao carregar edital:', error)
@@ -532,6 +563,8 @@ const addFiles = (files: File[]) => {
 const clearFile = () => {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
   uploadedFiles.value = []
+  existingFileUrl.value = null
+  existingFileName.value = ''
   previewUrl.value = null
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -574,6 +607,11 @@ const handleItemFileSelect = (event: Event, index: number) => {
 const removeAttachmentItem = (index: number) => {
   attachmentItems.value.splice(index, 1)
   delete itemInputRefs.value[index]
+}
+
+const clearAttachmentFile = (index: number) => {
+    attachmentItems.value[index].file = null
+    attachmentItems.value[index].serverUrl = undefined
 }
 
 
@@ -624,14 +662,18 @@ const submitEdital = async () => {
     router.push('/')
   } catch (err: any) {
     console.error('Erro ao salvar edital:', err)
-    if (err.response?.data?.numero) {
-        errors.value.numero = 'Este ID de Edital já existe.'
-        uiStore.showToast({ type: 'error', message: 'ID do Edital já existe' })
-        // Volta para step 0 para mostrar erro
-        currentStep.value = 0
-    } else {
-        uiStore.showToast({ type: 'error', message: 'Erro ao salvar edital' })
+    let errorDetail = ''
+    if (err.response?.data) {
+        console.log('🔴 DETALHES DO ERRO API:', JSON.stringify(err.response.data, null, 2)) // LOG IMPORTANTE
+        if (err.response.data.numero) {
+           errors.value.numero = 'Este ID de Edital já existe.'
+           errorDetail = 'ID do Edital já existe'
+           currentStep.value = 0
+        } else if (typeof err.response.data === 'object') {
+           errorDetail = JSON.stringify(err.response.data)
+        }
     }
+    uiStore.showToast({ type: 'error', message: `Erro ao salvar edital: ${errorDetail}` })
   } finally {
     isSubmitting.value = false
   }
