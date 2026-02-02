@@ -15,11 +15,13 @@ This interaction focused on the complete modularization of the `HomePage.vue` ar
 
 ## 3. GitHub Activity
 - **Issues Closed**:
+    - [#1](https://github.com/tadeuaugustovs/frontend_edit_2/issues/1): US-103: Edital Listing Functionality
+    - [#2](https://github.com/tadeuaugustovs/frontend_edit_2/issues/2): US-101: Create Edital functionality
     - [#4](https://github.com/tadeuaugustovs/frontend_edit_2/issues/4): TASK-101: Modularize HomePage.vue architecture
     - [#5](https://github.com/tadeuaugustovs/frontend_edit_2/issues/5): TASK-102: Integrate Mock Login profile fetch
     - [#6](https://github.com/tadeuaugustovs/frontend_edit_2/issues/6): TASK-103: Disable Metrics Card UI
 - **Commits**:
-    - `d76f8e96`: chore: merge branch 'develop' (modularization) into 'work-submission' resolving conflicts
+    - [d76f8e96](https://github.com/tadeuaugustovs/frontend_edit_2/commit/d76f8e96): feat: modularize homepage (#4), integrate mock login (#5), and hide metrics card (#6)
 
 ## 4. Next Steps
 - Implement "Refine Edital Form CSS".
