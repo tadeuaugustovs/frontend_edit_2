@@ -51,6 +51,20 @@ docker-compose up -d --build
 ```
 O sistema estará acessível em `http://localhost:3000`.
 
+### 3. Mock Server (Backend Fake)
+
+Para desenvolvimento frontend independente do Django (Offline Mode):
+
+```bash
+# Inicie o servidor mock (Porta 8001)
+npm run mock-server
+
+# Em outro terminal, inicie o frontend apontando para o mock
+npm run switch:mock
+npm run dev
+```
+O Fake Backend roda em `http://localhost:8001` e serve contratos definidos em `contracts/`.
+
 ## 📸 Screenshots
 
 *(Espaço reservado para capturas de tela do Painel, Modal de Detalhes e Formulários)*

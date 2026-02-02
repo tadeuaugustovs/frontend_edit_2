@@ -29,7 +29,7 @@ export interface EditalFormData {
 export interface EditalPayload {
   numero: string
   nome: string // Backend usa 'nome' herdado de ItemConhecimento
-  descricao: string // Vamos ver onde salvar, provavelmente metadata ou criar campo custom se nao tiver
+
   status: string
   tags: string[]
   metadata: Record<string, string>

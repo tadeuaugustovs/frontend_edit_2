@@ -87,13 +87,15 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tags</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tags *</label>
                 <input
                   v-model="formData.tags"
                   type="text"
                   placeholder="Ex: inovação, tecnologia, pesquisa (separadas por vírgula)"
                   class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  :class="{ 'border-red-500': errors.tags }"
                 />
+                <p v-if="errors.tags" class="mt-1 text-sm text-red-600">{{ errors.tags }}</p>
               </div>
 
               <div>
@@ -145,8 +147,12 @@
           <div v-if="currentStep === 1">
             <div class="flex items-center gap-2 mb-6">
               <Upload class="h-5 w-5 text-blue-600" />
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documento Principal</h2>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documento Principal *</h2>
             </div>
+            <p v-if="errors.file" class="mb-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 flex items-center gap-2">
+              <X class="h-4 w-4" />
+              {{ errors.file }}
+            </p>
 
             <!-- State A: Upload Zone (No File) -->
               <div
@@ -377,10 +383,8 @@ const steps = [
 
 const currentStep = ref(0)
 const isDragging = ref(false)
-const isDraggingAttachments = ref(false)
 const isSubmitting = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
-const attachmentInput = ref<HTMLInputElement | null>(null)
 
 // Identificar se é edição
 const isEditing = computed(() => !!route.params.id)
@@ -407,7 +411,7 @@ const attachmentItems = ref<AttachmentItem[]>([])
 const previewUrl = ref<string | null>(null)
 const existingFileUrl = ref<string | null>(null)
 const existingFileName = ref<string>('')
-const errors = ref({ numero: '', title: '', description: '' })
+const errors = ref({ numero: '', title: '', description: '', tags: '', file: '' })
 const itemInputRefs = ref<Record<number, HTMLInputElement>>({})
 
 const setAttachmentInputRef = (el: any, index: number) => {
@@ -494,7 +498,7 @@ const previousStep = () => {
 }
 
 const validateCurrentStep = () => {
-  errors.value = { numero: '', title: '', description: '' }
+  errors.value = { numero: '', title: '', description: '', tags: '', file: '' }
   if (currentStep.value === 0) {
     let isValid = true
     
@@ -503,8 +507,6 @@ const validateCurrentStep = () => {
       errors.value.numero = 'ID do Edital é obrigatório'
       isValid = false
     } else if (!/^[A-Za-z0-9]{2}\/[A-Za-z0-9]{4}$/.test(formData.value.numero.trim())) {
-     // Regex permite 2 alfanuméricos / 4 alfanuméricos. Ajuste conforme necessidade estrita.
-     // Se precisar ser estritamente números: /^\d{2}\/\d{4}$/
       errors.value.numero = 'Formato inválido. Use XX/XXXX'
       isValid = false
     }
@@ -517,9 +519,25 @@ const validateCurrentStep = () => {
       errors.value.description = 'Descrição é obrigatória'
       isValid = false
     }
+    if (!formData.value.tags.trim()) {
+      errors.value.tags = 'Pelo menos uma tag é obrigatória'
+      isValid = false
+    }
     
     return isValid
   }
+
+  if (currentStep.value === 1) {
+    // Verificar se há PDF carregado ou existente no servidor
+    const hasFile = uploadedFiles.value.length > 0 || !!existingFileUrl.value
+    if (!hasFile) {
+      errors.value.file = 'O documento principal em PDF é obrigatório.'
+      uiStore.showToast({ type: 'error', message: 'O arquivo PDF é obrigatório' })
+      return false
+    }
+    return true
+  }
+
   return true
 }
 

@@ -15,15 +15,17 @@ export const authService = {
 
     console.log('✅ Login bem-sucedido, token recebido')
 
+    // Configura o token no client para a próxima chamada
+    localStorage.setItem('access_token', response.token)
+
+    // Busca dados do usuário após login
+    const user = await this.getCurrentUser()
+
     return {
-      user: {
-        id: '1',
-        email: `${credentials.username}@example.com`,
-        name: credentials.username
-      },
+      user,
       tokens: {
         access: response.token,
-        refresh: response.token // Backend legado não usa refresh/access par separado neste endpoint
+        refresh: response.token
       }
     }
   },

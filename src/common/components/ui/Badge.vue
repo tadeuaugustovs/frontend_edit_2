@@ -8,7 +8,7 @@
 import { computed } from 'vue'
 
 export interface BadgeProps {
-  variant?: 'default' | 'secondary' | 'destructive' | 'success' | 'outline'
+  variant?: 'default' | 'secondary' | 'destructive' | 'success' | 'outline' | 'warning'
   size?: 'sm' | 'md' | 'lg'
 }
 
@@ -26,6 +26,7 @@ const badgeClasses = computed(() => {
     destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/80',
     success: 'bg-green-500 text-white hover:bg-green-600',
     outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+    warning: 'bg-yellow-500 text-white hover:bg-yellow-600',
   }
   
   const sizes = {

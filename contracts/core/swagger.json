@@ -1,0 +1,124 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Core & Auth Module API",
+        "version": "1.0.0",
+        "description": "API Contract for Core entities (Agente, Organizacao) and Authentication."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "tokenAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "Token-based authentication. Format: 'Token <token>'"
+            }
+        },
+        "schemas": {
+            "Agente": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "contato": {
+                        "type": "string"
+                    },
+                    "papel": {
+                        "type": "string",
+                        "enum": [
+                            "QUESTIONANTE",
+                            "RESPONDENTE"
+                        ]
+                    },
+                    "resourcetype": {
+                        "type": "string",
+                        "description": "Polymorphic Type Info"
+                    }
+                }
+            },
+            "LoginCredentials": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "username",
+                    "password"
+                ]
+            },
+            "TokenRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/core/agente/": {
+            "get": {
+                "summary": "List Agentes",
+                "tags": [
+                    "Core"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/core/api-token-auth/": {
+            "post": {
+                "summary": "Obtain Auth Token",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginCredentials"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token Returned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenRequest"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

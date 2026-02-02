@@ -1,0 +1,64 @@
+[
+    {
+        "model": "Agente",
+        "type": "PolymorphicModel",
+        "fields": {
+            "nome": "CharField(max_length=300, null=True, blank=True)",
+            "contato": "CharField(max_length=300, null=True, blank=True, unique=True)",
+            "papel": "CharField(choices=['QUESTIONANTE', 'RESPONDENTE'], default='QUESTIONANTE')"
+        }
+    },
+    {
+        "model": "Humano",
+        "extends": "Agente",
+        "fields": {}
+    },
+    {
+        "model": "Artificial",
+        "extends": "Agente",
+        "fields": {
+            "modelo": "CharField(max_length=300, null=True, blank=True)"
+        }
+    },
+    {
+        "model": "Responsavel",
+        "extends": "Humano",
+        "fields": {}
+    },
+    {
+        "model": "Organizacao",
+        "type": "PolymorphicModel",
+        "fields": {
+            "nome": "CharField(max_length=300, null=True, blank=True)"
+        }
+    },
+    {
+        "model": "UnidadeOrganizacional",
+        "type": "PolymorphicModel",
+        "fields": {
+            "nome": "CharField(max_length=300, null=True, blank=True)",
+            "telefone": "CharField(max_length=300, null=True, blank=True, unique=True)",
+            "organizacao_responsavel": "ForeignKey(Organizacao)",
+            "responsavel": "ForeignKey(Responsavel)"
+        }
+    },
+    {
+        "model": "ItemConhecimento",
+        "type": "PolymorphicModel",
+        "fields": {
+            "nome": "CharField(max_length=300, null=True, blank=True)",
+            "arquivo": "FileField(upload_to=item)",
+            "metadata": "JSONField()",
+            "setor_responsavel": "ForeignKey(UnidadeOrganizacional)"
+        }
+    },
+    {
+        "model": "Anexo",
+        "type": "Model",
+        "fields": {
+            "nome": "CharField(max_length=500, null=True, blank=True)",
+            "item": "ForeignKey(ItemConhecimento, related_name='arquivos')",
+            "arquivo": "FileField(upload_to=item)"
+        }
+    }
+]

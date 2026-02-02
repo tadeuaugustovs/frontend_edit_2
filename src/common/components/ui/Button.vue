@@ -16,7 +16,7 @@ import Spinner from './Spinner.vue'
 
 export interface ButtonProps {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'icon'
   disabled?: boolean
   loading?: boolean
   type?: 'button' | 'submit' | 'reset'
@@ -48,6 +48,7 @@ const buttonClasses = computed(() => {
     sm: 'h-9 px-3 text-sm',
     md: 'h-10 px-4 py-2',
     lg: 'h-11 px-8 text-lg',
+    icon: 'h-10 w-10',
   }
   
   return `${base} ${variants[props.variant]} ${sizes[props.size]}`
