@@ -13,7 +13,7 @@ class ApiClient {
 
     this.instance = axios.create({
       baseURL,
-      timeout: 10000,
+      timeout: 60000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,6 +31,10 @@ class ApiClient {
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
+        }
+
+        if (config.data instanceof FormData || (config.data && config.data.constructor && config.data.constructor.name === 'FormData')) {
+          delete config.headers['Content-Type']
         }
 
         return config
@@ -52,7 +56,7 @@ class ApiClient {
               this.failedQueue.push({ resolve, reject })
             })
               .then((token) => {
-                originalRequest.headers.Authorization = `Bearer ${token}`
+                originalRequest.headers.Authorization = `Token ${token}`
                 return this.instance(originalRequest)
               })
               .catch((err) => Promise.reject(err))
@@ -75,7 +79,7 @@ class ApiClient {
           try {
             // Tenta refresh token
             const response = await axios.post(
-              `${this.instance.defaults.baseURL}/auth/refresh/`,
+              `${this.instance.defaults.baseURL}/api/auth/refresh/`,
               { refresh: refreshToken }
             )
 
@@ -86,7 +90,7 @@ class ApiClient {
             this.failedQueue.forEach((prom) => prom.resolve(access))
             this.failedQueue = []
 
-            originalRequest.headers.Authorization = `Bearer ${access}`
+            originalRequest.headers.Authorization = `Token ${access}`
             return this.instance(originalRequest)
           } catch (refreshError) {
             this.failedQueue.forEach((prom) => prom.reject(refreshError))
@@ -114,14 +118,14 @@ class ApiClient {
 
   async post<T>(url: string, data?: any, config?: any): Promise<T> {
     // Debug log para login
-    if (url === '/api-token-auth/') {
+    if (url.includes('/auth/login/')) {
       console.log('🌐 Enviando requisição para Django:', {
         url: `${this.instance.defaults.baseURL}${url}`,
         data,
         headers: this.instance.defaults.headers
       })
     }
-    
+
     const response = await this.instance.post<T>(url, data, config)
     return response.data
   }
@@ -137,11 +141,12 @@ class ApiClient {
   }
 
   async uploadFile(url: string, formData: FormData): Promise<any> {
-    const response = await this.instance.post(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await this.instance.post(url, formData)
+    return response.data
+  }
+
+  async patch<T>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.instance.patch<T>(url, data, config)
     return response.data
   }
 

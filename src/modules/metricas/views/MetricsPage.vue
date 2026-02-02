@@ -45,6 +45,7 @@
               <Trash2 class="h-4 w-4" />
               Limpar Cache
             </Button>
+<<<<<<< HEAD
             <Button 
               variant="outline" 
               size="sm" 
@@ -58,6 +59,12 @@
             <Button variant="outline" size="sm" @click="openReportsCenter" class="gap-2">
               <Reports class="h-4 w-4" />
               Central de Relatórios
+=======
+            <!-- Botão de Configuração removido conforme solicitação -->
+            <Button variant="outline" size="sm" @click="openReportsCenter" class="gap-2">
+              <Reports class="h-4 w-4" />
+              Enviar Relatório por E-mail
+>>>>>>> develop
             </Button>
           </div>
         </div>
@@ -416,6 +423,7 @@ const clearCache = () => {
     message: 'Cache limpo com sucesso'
   })
   loadMetrics()
+<<<<<<< HEAD
 }
 
 const toggleEditMode = () => {
@@ -428,6 +436,12 @@ const toggleEditMode = () => {
   }
 }
 
+=======
+}
+
+
+
+>>>>>>> develop
 const toggleWidgetVisibility = (widgetId: string) => {
   widgetVisibility.value[widgetId] = !widgetVisibility.value[widgetId]
 }

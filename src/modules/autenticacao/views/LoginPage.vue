@@ -159,7 +159,11 @@ const handleSubmit = async () => {
     router.push(redirect || '/')
   } catch (error: any) {
     console.error('Login error:', error)
+<<<<<<< HEAD
     if (error.response?.status === 401) {
+=======
+    if (error.response?.status === 401 || error.response?.status === 400) {
+>>>>>>> develop
       errorMessage.value = 'Usuário ou senha incorretos.'
     } else {
       errorMessage.value = 'Erro ao conectar. Tente novamente.'

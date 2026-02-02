@@ -1,10 +1,10 @@
-import type { 
-  User, 
-  AuthTokens, 
-  EditalResponse, 
+import type {
+  User,
+  AuthTokens,
+  EditalResponse,
   EngagementMetricsResponse,
   Message,
-  ConversationSession 
+  ConversationSession
 } from '@/common/types/api.types'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -12,13 +12,13 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 export const mockService = {
   async login(username: string, password: string): Promise<{ token: string }> {
     await delay(500)
-    
+
     // Accept any credentials for testing
     // Just validate that username and password are not empty
     if (!username || !password) {
       throw new Error('Usuário e senha são obrigatórios')
     }
-    
+
     // Simulate Django token auth response
     return {
       token: 'mock-access-token-' + username,
@@ -33,8 +33,8 @@ export const mockService = {
         title: 'Edital de Chamada Pública nº 001/2024',
         description: 'Edital para seleção de projetos de pesquisa em áreas estratégicas',
         status: 'open',
-        metadata: { 
-          'prazo': '31/01/2024', 
+        metadata: {
+          'prazo': '31/01/2024',
           'valor': 'R$ 50.000',
           'area': 'Ciências Exatas'
         },
@@ -53,8 +53,8 @@ export const mockService = {
         title: 'Edital de Seleção de Pesquisadores nº 002/2024',
         description: 'Seleção de pesquisadores para projetos de inovação tecnológica',
         status: 'open',
-        metadata: { 
-          'prazo': '15/02/2024', 
+        metadata: {
+          'prazo': '15/02/2024',
           'valor': 'R$ 80.000',
           'area': 'Tecnologia'
         },
@@ -71,8 +71,8 @@ export const mockService = {
         title: 'Edital de Bolsas de Estudo nº 003/2024',
         description: 'Concessão de bolsas de estudo para mestrado e doutorado',
         status: 'analyzing',
-        metadata: { 
-          'prazo': '28/02/2024', 
+        metadata: {
+          'prazo': '28/02/2024',
           'valor': 'R$ 120.000',
           'area': 'Educação'
         },
@@ -140,7 +140,7 @@ export const mockService = {
 
   async getMessages(editalId?: string): Promise<Message[]> {
     await delay(300)
-    
+
     const allMessages: Message[] = [
       {
         id: '1',
@@ -188,17 +188,17 @@ export const mockService = {
         editalId: '3',
       },
     ]
-    
+
     if (editalId) {
       return allMessages.filter(m => m.editalId === editalId)
     }
-    
+
     return allMessages
   },
 
   async getSessions(limit = 50, offset = 0): Promise<ConversationSession[]> {
     await delay(400)
-    
+
     const allSessions: ConversationSession[] = [
       {
         id: 'sess_001',
@@ -282,29 +282,29 @@ export const mockService = {
         ],
       },
     ]
-    
+
     // Apply pagination
     return allSessions.slice(offset, offset + limit)
   },
 
   async getSessionDetail(sessionId: string): Promise<ConversationSession> {
     await delay(300)
-    
+
     const sessions = await this.getSessions()
     const session = sessions.find(s => s.id === sessionId)
-    
+
     if (!session) {
       throw new Error('Session not found')
     }
-    
+
     return session
   },
 
   async searchSessions(email?: string, userId?: string): Promise<ConversationSession[]> {
     await delay(400)
-    
+
     const sessions = await this.getSessions()
-    
+
     return sessions.filter(session => {
       if (email && !session.userEmail.toLowerCase().includes(email.toLowerCase())) {
         return false

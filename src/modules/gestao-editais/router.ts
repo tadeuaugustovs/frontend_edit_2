@@ -13,6 +13,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./views/ManagementPage.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/management/:id',
+    name: 'management-edit',
+    component: () => import('./views/ManagementPage.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 export default routes

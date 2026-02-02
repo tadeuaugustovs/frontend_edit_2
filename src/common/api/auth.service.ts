@@ -4,35 +4,28 @@ import type { User, AuthTokens, LoginCredentials } from '@/common/types/user.typ
 export const authService = {
   async login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }> {
     console.log('🔐 Tentando login com:', { username: credentials.username })
-    
-    // Django JWT API - endpoint correto com prefixo /api/
-    const response = await apiClient.post<{ 
-      access: string
-      refresh: string
-      user: {
-        id: number
-        username: string
-        email: string
-        first_name: string
-        last_name: string
-      }
-    }>('/api/auth/login/', {
+
+    // Django Token Auth - endpoint para o mock server e compatibilidade local
+    const response = await apiClient.post<{
+      token: string
+    }>('/api-token-auth/', {
       username: credentials.username,
       password: credentials.password
     })
-    
-    console.log('✅ Login bem-sucedido, tokens JWT recebidos')
-    
-    // Adaptar resposta do Django para o formato esperado
+
+    console.log('✅ Login bem-sucedido, token recebido')
+
+    // Configura o token no client para a próxima chamada
+    localStorage.setItem('access_token', response.token)
+
+    // Busca dados do usuário após login para remover fake data do frontend
+    const user = await this.getCurrentUser()
+
     return {
-      user: {
-        id: response.user.id.toString(),
-        email: response.user.email,
-        name: response.user.first_name || response.user.username
-      },
+      user,
       tokens: {
-        access: response.access,
-        refresh: response.refresh
+        access: response.token,
+        refresh: response.token
       }
     }
   },
@@ -46,6 +39,8 @@ export const authService = {
         console.warn('Erro ao fazer logout no servidor:', error)
       }
     }
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
     return Promise.resolve()
   },
 
@@ -67,7 +62,7 @@ export const authService = {
       first_name: string
       last_name: string
     }>('/api/auth/me/')
-    
+
     return {
       id: response.id.toString(),
       email: response.email,

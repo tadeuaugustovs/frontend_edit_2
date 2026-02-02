@@ -49,11 +49,32 @@
 
             <div class="space-y-6">
               <div>
+<<<<<<< HEAD
+=======
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">ID do Edital *</label>
+                <input
+                  v-model="formData.numero"
+                  type="text"
+                  placeholder="Ex: 01/2025"
+                  :disabled="isEditing"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                  :class="{ 'border-red-500': errors.numero }"
+                />
+                <p class="text-xs text-gray-500 mt-1">Formato: XX/XXXX (Ex: 01/2026)</p>
+                <p v-if="errors.numero" class="mt-1 text-sm text-red-600">{{ errors.numero }}</p>
+              </div>
+
+              <div>
+>>>>>>> develop
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Título *</label>
                 <input
                   v-model="formData.title"
                   type="text"
+<<<<<<< HEAD
                   placeholder="Ex: Edital FAPES 001/2025"
+=======
+                  placeholder="Ex: Edital FAPES de Inovação"
+>>>>>>> develop
                   class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   :class="{ 'border-red-500': errors.title }"
                 />
@@ -73,6 +94,21 @@
               </div>
 
               <div>
+<<<<<<< HEAD
+=======
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Tags *</label>
+                <input
+                  v-model="formData.tags"
+                  type="text"
+                  placeholder="Ex: inovação, tecnologia, pesquisa (separadas por vírgula)"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  :class="{ 'border-red-500': errors.tags }"
+                />
+                <p v-if="errors.tags" class="mt-1 text-sm text-red-600">{{ errors.tags }}</p>
+              </div>
+
+              <div>
+>>>>>>> develop
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Status *</label>
                 <select
                   v-model="formData.status"
@@ -121,12 +157,25 @@
           <div v-if="currentStep === 1">
             <div class="flex items-center gap-2 mb-6">
               <Upload class="h-5 w-5 text-blue-600" />
+<<<<<<< HEAD
               <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documento Principal</h2>
             </div>
 
             <!-- State A: Upload Zone (No File) -->
             <div
               v-if="uploadedFiles.length === 0"
+=======
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Documento Principal *</h2>
+            </div>
+            <p v-if="errors.file" class="mb-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 flex items-center gap-2">
+              <X class="h-4 w-4" />
+              {{ errors.file }}
+            </p>
+
+            <!-- State A: Upload Zone (No File) -->
+              <div
+              v-if="uploadedFiles.length === 0 && !existingFileUrl"
+>>>>>>> develop
               @drop.prevent="handleDrop"
               @dragover.prevent
               @dragenter="isDragging = true"
@@ -152,8 +201,13 @@
                 <div class="flex items-center gap-3">
                   <FileText class="h-5 w-5 text-blue-600" />
                   <div>
+<<<<<<< HEAD
                      <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ uploadedFiles[0].name }}</p>
                      <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatFileSize(uploadedFiles[0].size) }}</p>
+=======
+                     <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ uploadedFiles.length > 0 ? uploadedFiles[0].name : existingFileName }}</p>
+                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ uploadedFiles.length > 0 ? formatFileSize(uploadedFiles[0].size) : 'Arquivo existente' }}</p>
+>>>>>>> develop
                   </div>
                 </div>
                 <Button variant="outline" size="sm" @click="clearFile" class="gap-2 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20">
@@ -174,6 +228,81 @@
                  </div>
               </div>
             </div>
+<<<<<<< HEAD
+=======
+
+            <!-- Attachments Section -->
+            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
+              <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                  <Paperclip class="h-5 w-5 text-blue-600" />
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100">Anexos</h2>
+                </div>
+                <Button variant="outline" size="sm" @click="addNewAttachmentItem" class="gap-2">
+                  <Plus class="h-4 w-4" />
+                  Adicionar Anexo
+                </Button>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="attachmentItems.length === 0" class="text-center py-8 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl">
+                 <p class="text-gray-500 dark:text-slate-400">Nenhum anexo adicionado. Clique no botão acima para incluir arquivos.</p>
+              </div>
+              
+              <!-- Attachment Items List -->
+              <div v-else class="space-y-4">
+                <div v-for="(item, index) in attachmentItems" :key="index" class="p-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm transition-all hover:border-blue-300 dark:hover:border-blue-700">
+                  <div class="flex items-start gap-4">
+                    <div class="flex-1 space-y-3">
+                       <!-- Display Name Input -->
+                       <div>
+                         <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1 uppercase tracking-wide">Nome de Exibição do Anexo</label>
+                         <input 
+                           v-model="item.displayName" 
+                           type="text" 
+                           placeholder="Ex: Anexo I - Cronograma" 
+                           class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                         />
+                       </div>
+
+                       <!-- File Selection -->
+                       <div v-if="!item.file && !item.serverUrl" class="flex items-center justify-center px-6 py-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors" @click="triggerItemFileInput(index)">
+                         <div class="space-y-1 text-center">
+                           <Upload class="mx-auto h-8 w-8 text-gray-400" />
+                           <div class="flex text-sm text-gray-600 dark:text-slate-400">
+                             <span class="relative cursor-pointer bg-white dark:bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                               <span>Clique para selecionar o arquivo</span>
+                               <input :ref="(el) => setAttachmentInputRef(el, index)" type="file" class="sr-only" @change="(e) => handleItemFileSelect(e, index)" />
+                             </span>
+                           </div>
+                           <p class="text-xs text-gray-500 dark:text-slate-500">PDF, DOCX, ou Imagem</p>
+                         </div>
+                       </div>
+
+                       <!-- File Preview (Selected) -->
+                       <div v-else class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                          <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white dark:bg-blue-900 rounded-lg shadow-sm">
+                              <FileText class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                               <p class="text-sm font-medium text-blue-900 dark:text-blue-100 truncate max-w-[200px]">{{ item.file ? item.file.name : item.displayName }}</p>
+                               <p class="text-xs text-blue-600 dark:text-blue-300">{{ item.file ? formatFileSize(item.file.size) : 'Arquivo existente' }}</p>
+                            </div>
+                          </div>
+                          <button @click="clearAttachmentFile(index)" class="text-xs text-red-600 hover:text-red-800 underline">Trocar</button>
+                       </div>
+                    </div>
+
+                    <!-- Remove Item Button -->
+                    <button @click="removeAttachmentItem(index)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Remover anexo">
+                      <Trash2 class="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+>>>>>>> develop
           </div>
 
           <div v-if="currentStep === 2">
@@ -198,9 +327,15 @@
               </div>
 
               <div class="bg-gray-50 dark:bg-slate-800 rounded-lg p-6">
+<<<<<<< HEAD
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Documentos</h3>
                 <div v-if="uploadedFiles.length === 0" class="text-sm text-gray-500 dark:text-slate-400">
                   Nenhum documento
+=======
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Documento Principal</h3>
+                <div v-if="uploadedFiles.length === 0" class="text-sm text-gray-500 dark:text-slate-400">
+                  Nenhum documento principal
+>>>>>>> develop
                 </div>
                 <div v-else class="space-y-2">
                   <div v-for="(file, index) in uploadedFiles" :key="index" class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-lg">
@@ -209,6 +344,27 @@
                   </div>
                 </div>
               </div>
+<<<<<<< HEAD
+=======
+
+              <div class="bg-gray-50 dark:bg-slate-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">Anexos</h3>
+                <div v-if="attachmentItems.length === 0" class="text-sm text-gray-500 dark:text-slate-400">
+                  Nenhum anexo
+                </div>
+                <div v-else class="space-y-2">
+                  <div v-for="(item, index) in attachmentItems" :key="index" class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-lg">
+                    <Paperclip class="h-5 w-5 text-blue-600" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-slate-100">{{ item.displayName || 'Sem nome' }}</p>
+                        <p v-if="item.file" class="text-xs text-gray-500">{{ item.file.name }}</p>
+                        <p v-else-if="item.serverUrl" class="text-xs text-blue-600 dark:text-blue-400">Arquivo carregado</p>
+                        <p v-else class="text-xs text-red-500">Arquivo pendente</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+>>>>>>> develop
             </div>
           </div>
 
@@ -240,17 +396,27 @@
 </template>
 
 <script setup lang="ts">
+<<<<<<< HEAD
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+=======
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+>>>>>>> develop
 import { useAuthStore } from '@/common/store/auth'
 import { useUiStore } from '@/common/store/ui'
 import { editalService } from '@/modules/gestao-editais/services/edital.service'
 import Button from '@/common/components/ui/Button.vue'
 import StepIndicator from '@/modules/gestao-editais/components/StepIndicator.vue'
 import AccessibilityMenu from '@/common/components/AccessibilityMenu.vue'
+<<<<<<< HEAD
 import { ArrowLeft, ArrowRight, FileText, Upload, Trash2, Plus, Send, LogOut } from 'lucide-vue-next'
+=======
+import { ArrowLeft, ArrowRight, FileText, Upload, Trash2, Plus, Send, LogOut, Paperclip, X, CheckCircle } from 'lucide-vue-next'
+>>>>>>> develop
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const uiStore = useUiStore()
 
@@ -259,6 +425,7 @@ const steps = [
   { title: 'Documentos', subtitle: 'Upload de arquivos' },
   { title: 'Revisão', subtitle: 'Confirmar dados' },
 ]
+<<<<<<< HEAD
 
 const currentStep = ref(0)
 const isDragging = ref(false)
@@ -339,6 +506,211 @@ const addFiles = (files: File[]) => {
 const clearFile = () => {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
   uploadedFiles.value = []
+=======
+
+const currentStep = ref(0)
+const isDragging = ref(false)
+const isSubmitting = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+// Identificar se é edição
+const isEditing = computed(() => !!route.params.id)
+const editingId = computed(() => route.params.id as string)
+
+const formData = ref({
+  numero: '',
+  title: '',
+  description: '',
+  tags: '',
+  status: 'open',
+  dynamicFields: [] as Array<{ key: string; value: string }>,
+})
+
+const uploadedFiles = ref<File[]>([]) // Main document
+// Refatorado para usar objetos
+interface AttachmentItem {
+  id: string
+  file: File | null
+  displayName: string
+  serverUrl?: string
+}
+const attachmentItems = ref<AttachmentItem[]>([]) 
+const previewUrl = ref<string | null>(null)
+const existingFileUrl = ref<string | null>(null)
+const existingFileName = ref<string>('')
+const errors = ref({ numero: '', title: '', description: '', tags: '', file: '' })
+const itemInputRefs = ref<Record<number, HTMLInputElement>>({})
+
+const setAttachmentInputRef = (el: any, index: number) => {
+  if (el) itemInputRefs.value[index] = el
+}
+
+onMounted(async () => {
+  if (isEditing.value) {
+    await loadEditalData(editingId.value)
+  }
+})
+
+const loadEditalData = async (id: string) => {
+  try {
+    // uiStore.isLoading = true
+    const edital = await editalService.getEdital(id)
+    
+    // Preencher formulário
+    formData.value.numero = edital.numero
+    formData.value.title = edital.nome
+    
+    // Tratamento seguro para metadados e descrição
+    const meta = edital.metadata || {}
+    formData.value.description = meta.descricao || ''
+    
+    // Tags
+    formData.value.tags = Array.isArray(edital.tags) ? edital.tags.join(', ') : ''
+    
+    formData.value.status = edital.status ? edital.status.toLowerCase() : 'open'
+    
+    // Campos dinâmicos (tudo que não é descricao no metadata)
+    const dynamicKeys = Object.keys(meta).filter(k => k !== 'descricao')
+    formData.value.dynamicFields = dynamicKeys.map(key => ({
+      key,
+      value: String(meta[key])
+    }))
+
+    // Arquivo principal
+    if (edital.arquivo) {
+       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002'
+       let fileUrl = edital.arquivo
+       if (fileUrl.startsWith('/') && !fileUrl.startsWith('http')) {
+           fileUrl = `${baseUrl}${fileUrl}`
+       }
+       
+       existingFileUrl.value = fileUrl
+       previewUrl.value = fileUrl
+       // Tenta extrair nome do arquivo
+       existingFileName.value = edital.arquivo.split('/').pop() || 'Arquivo Principal'
+    }
+
+    // Anexos
+    if (edital.arquivos && Array.isArray(edital.arquivos)) {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002'
+        attachmentItems.value = edital.arquivos.map((anexo: any) => {
+             let fileUrl = anexo.arquivo
+             if (fileUrl && fileUrl.startsWith('/') && !fileUrl.startsWith('http')) {
+                 fileUrl = `${baseUrl}${fileUrl}`
+             }
+             return {
+                id: `server-${anexo.id}`,
+                file: null,
+                displayName: anexo.nome || (anexo.arquivo ? anexo.arquivo.split('/').pop() : 'Anexo'),
+                serverUrl: fileUrl
+             }
+        })
+    }
+    
+  } catch (error) {
+    console.error('Erro ao carregar edital:', error)
+    uiStore.showToast({ type: 'error', message: 'Erro ao carregar dados do edital' })
+    router.push('/')
+  } finally {
+    // uiStore.isLoading = false
+  }
+}
+
+const nextStep = () => {
+  if (validateCurrentStep()) currentStep.value++
+}
+
+const previousStep = () => {
+  currentStep.value--
+}
+
+const validateCurrentStep = () => {
+  errors.value = { numero: '', title: '', description: '', tags: '', file: '' }
+  if (currentStep.value === 0) {
+    let isValid = true
+    
+    // Validação ID do Edital (XX/XXXX)
+    if (!formData.value.numero.trim()) {
+      errors.value.numero = 'ID do Edital é obrigatório'
+      isValid = false
+    } else if (!/^[A-Za-z0-9]{2}\/[A-Za-z0-9]{4}$/.test(formData.value.numero.trim())) {
+      errors.value.numero = 'Formato inválido. Use XX/XXXX'
+      isValid = false
+    }
+
+    if (!formData.value.title.trim()) {
+      errors.value.title = 'Título é obrigatório'
+      isValid = false
+    }
+    if (!formData.value.description.trim()) {
+      errors.value.description = 'Descrição é obrigatória'
+      isValid = false
+    }
+    if (!formData.value.tags.trim()) {
+      errors.value.tags = 'Pelo menos uma tag é obrigatória'
+      isValid = false
+    }
+    
+    return isValid
+  }
+
+  if (currentStep.value === 1) {
+    // Verificar se há PDF carregado ou existente no servidor
+    const hasFile = uploadedFiles.value.length > 0 || !!existingFileUrl.value
+    if (!hasFile) {
+      errors.value.file = 'O documento principal em PDF é obrigatório.'
+      uiStore.showToast({ type: 'error', message: 'O arquivo PDF é obrigatório' })
+      return false
+    }
+    return true
+  }
+
+  return true
+}
+
+const addDynamicField = () => {
+  formData.value.dynamicFields.push({ key: '', value: '' })
+}
+
+const removeDynamicField = (index: number) => {
+  formData.value.dynamicFields.splice(index, 1)
+}
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files) addFiles(Array.from(target.files))
+}
+
+const handleDrop = (event: DragEvent) => {
+  isDragging.value = false
+  if (event.dataTransfer?.files) addFiles(Array.from(event.dataTransfer.files))
+}
+
+const addFiles = (files: File[]) => {
+  const pdfFile = files.find(file => file.type === 'application/pdf')
+  
+  if (pdfFile) {
+    if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+    
+    uploadedFiles.value = [pdfFile]
+    previewUrl.value = URL.createObjectURL(pdfFile)
+    
+    uiStore.showToast({ type: 'success', message: 'PDF carregado com sucesso' })
+  } else {
+    uiStore.showToast({ type: 'warning', message: 'Por favor, selecione apenas arquivos PDF' })
+  }
+}
+
+const clearFile = () => {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+  uploadedFiles.value = []
+  existingFileUrl.value = null
+  existingFileName.value = ''
+>>>>>>> develop
   previewUrl.value = null
   if (fileInput.value) fileInput.value.value = ''
 }
@@ -351,6 +723,47 @@ const formatFileSize = (bytes: number) => {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
+<<<<<<< HEAD
+=======
+// Novos handlers para Anexos
+const addNewAttachmentItem = () => {
+  attachmentItems.value.push({
+    id: `new-${Date.now()}`,
+    file: null,
+    displayName: ''
+  })
+}
+
+const triggerItemFileInput = (index: number) => {
+  const input = itemInputRefs.value[index]
+  if (input) input.click()
+}
+
+const handleItemFileSelect = (event: Event, index: number) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0]
+    attachmentItems.value[index].file = file
+    // Se o display name estiver vazio, preencher com o nome do arquivo (sem extensão)
+    if (!attachmentItems.value[index].displayName) {
+       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "")
+       attachmentItems.value[index].displayName = nameWithoutExt
+    }
+  }
+}
+
+const removeAttachmentItem = (index: number) => {
+  attachmentItems.value.splice(index, 1)
+  delete itemInputRefs.value[index]
+}
+
+const clearAttachmentFile = (index: number) => {
+    attachmentItems.value[index].file = null
+    attachmentItems.value[index].serverUrl = undefined
+}
+
+
+>>>>>>> develop
 const submitEdital = async () => {
   isSubmitting.value = true
   try {
@@ -363,6 +776,7 @@ const submitEdital = async () => {
       file: mainFile
     } : null
 
+<<<<<<< HEAD
     const annexesObjects = uploadedFiles.value.slice(1).map((file, index) => ({
       id: `temp-annexe-${index}`,
       name: file.name,
@@ -385,6 +799,55 @@ const submitEdital = async () => {
   } catch (error) {
     console.error('Erro ao criar edital:', error)
     uiStore.showToast({ type: 'error', message: 'Erro ao criar edital' })
+=======
+    // Mapeia os attachmentItems para o formato que o service espera
+    const annexesObjects = attachmentItems.value
+      .filter(item => item.file !== null)
+      .map((item, index) => ({
+        id: `temp-annexe-${index}`,
+        name: item.file!.name,
+        displayName: item.displayName || item.file!.name, // Usa o display name ou fallback pro nome do arquivo
+        file: item.file!
+      }))
+
+    const payload = {
+      numero: formData.value.numero, // Backend UNIQUE
+      title: formData.value.title,
+      description: formData.value.description,
+      tags: formData.value.tags,
+      status: formData.value.status as 'open' | 'closed' | 'analyzing',
+      dynamicFields: formData.value.dynamicFields.filter(f => f.key && f.value).map((f, i) => ({ ...f, id: `temp-field-${i}` })), 
+      mainPDF: mainPDFObject,
+      annexes: annexesObjects,
+      results: [],
+    }
+
+    if (isEditing.value) {
+      // Se é edição, chamamos update
+      await editalService.updateEdital(editingId.value, payload)
+      uiStore.showToast({ type: 'success', message: 'Edital atualizado com sucesso!' })
+    } else {
+      // Criação normal
+      await editalService.createEdital(payload)
+      uiStore.showToast({ type: 'success', message: 'Edital criado com sucesso!' })
+    }
+    
+    router.push('/')
+  } catch (err: any) {
+    console.error('Erro ao salvar edital:', err)
+    let errorDetail = ''
+    if (err.response?.data) {
+        console.log('🔴 DETALHES DO ERRO API:', JSON.stringify(err.response.data, null, 2)) // LOG IMPORTANTE
+        if (err.response.data.numero) {
+           errors.value.numero = 'Este ID de Edital já existe.'
+           errorDetail = 'ID do Edital já existe'
+           currentStep.value = 0
+        } else if (typeof err.response.data === 'object') {
+           errorDetail = JSON.stringify(err.response.data)
+        }
+    }
+    uiStore.showToast({ type: 'error', message: `Erro ao salvar edital: ${errorDetail}` })
+>>>>>>> develop
   } finally {
     isSubmitting.value = false
   }

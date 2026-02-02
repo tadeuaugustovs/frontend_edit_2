@@ -1,0 +1,18 @@
+[
+    {
+        "model": "Edital",
+        "extends": "ItemConhecimento",
+        "description": "Public Notice entity inheriting from ItemConhecimento",
+        "fields": {
+            "numero": "CharField(max_length=7, unique=True, help_text='Número do edital no formato Número/Ano')",
+            "status": "CharField(max_length=12, choices=['ABERTO', 'EM_ANDAMENTO', 'ENCERRADO'], default='ABERTO')",
+            "tags": "ArrayField(CharField(max_length=500), default=list)"
+        },
+        "inherited_fields": {
+            "nome": "inherited from ItemConhecimento",
+            "arquivo": "inherited from ItemConhecimento (Main PDF)",
+            "metadata": "inherited from ItemConhecimento",
+            "setor_responsavel": "inherited from ItemConhecimento"
+        }
+    }
+]

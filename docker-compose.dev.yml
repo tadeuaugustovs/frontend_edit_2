@@ -1,0 +1,51 @@
+version: '3.8'
+
+# Configuração para desenvolvimento com hot reload
+
+services:
+  # Backend Django com hot reload
+  backend:
+    build:
+      context: ./django_backend
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-dev-key
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - DOCKER=true
+    volumes:
+      - ./django_backend:/app
+      - backend_media:/app/media
+    restart: always
+    networks:
+      - edital-network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # Frontend com Vite dev server (hot reload)
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5174:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8002
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: always
+    networks:
+      - edital-network
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  backend_media:
+
+networks:
+  edital-network:
+    driver: bridge

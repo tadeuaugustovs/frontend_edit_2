@@ -51,14 +51,22 @@ export interface MessagesResponse {
 export const metricsService = {
   async getEngagementMetrics(): Promise<EngagementMetrics> {
     console.log('📊 Buscando métricas de engajamento FAPES...')
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> develop
     try {
       const response = await apiClient.get<EngagementMetrics>('/api/metrics/engagement/')
       console.log('✅ Métricas recebidas:', response)
       return response
     } catch (error) {
       console.error('❌ Erro ao buscar métricas, usando dados do PDF FAPES:', error)
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> develop
       // Dados reais extraídos do PDF da FAPES
       return {
         total_messages: 2658,
@@ -119,19 +127,33 @@ export const metricsService = {
     end_date?: string
   }): Promise<MessagesResponse> {
     console.log('📨 Buscando mensagens...', params)
+<<<<<<< HEAD
     
     try {
       const queryParams = new URLSearchParams()
       
+=======
+
+    try {
+      const queryParams = new URLSearchParams()
+
+>>>>>>> develop
       if (params?.page) queryParams.append('page', params.page.toString())
       if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
       if (params?.edital_id) queryParams.append('edital_id', params.edital_id)
       if (params?.start_date) queryParams.append('start_date', params.start_date)
       if (params?.end_date) queryParams.append('end_date', params.end_date)
+<<<<<<< HEAD
       
       const url = `/api/metrics/messages/${queryParams.toString() ? '?' + queryParams.toString() : ''}`
       const response = await apiClient.get<MessagesResponse>(url)
       
+=======
+
+      const url = `/api/metrics/messages/${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+      const response = await apiClient.get<MessagesResponse>(url)
+
+>>>>>>> develop
       console.log('✅ Mensagens recebidas:', response.results?.length || 0)
       return response
     } catch (error) {

@@ -1,0 +1,307 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Edital Module API",
+        "version": "1.0.0",
+        "description": "API Contract for the Gestão de Editais module."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "tokenAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "Token-based authentication. Format: 'Token <token>'"
+            }
+        },
+        "schemas": {
+            "Edital": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "numero": {
+                        "type": "string",
+                        "maxLength": 7,
+                        "description": "Format: XX/YYYY"
+                    },
+                    "nome": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ABERTO",
+                            "EM_ANDAMENTO",
+                            "ENCERRADO"
+                        ]
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "arquivo": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "metadata": {
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "numero",
+                    "status"
+                ]
+            }
+        }
+    },
+    "paths": {
+        "/edital/edital/": {
+            "get": {
+                "summary": "List all Editais",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Editais",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "next": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "previous": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Edital"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new Edital",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Edital"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Edital"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Edital"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation Error"
+                    }
+                }
+            }
+        },
+        "/edital/edital/{id}/": {
+            "get": {
+                "summary": "Retrieve an Edital",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Edital"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update an Edital",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Edital"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partial Update an Edital",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Edital"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an Edital",
+                "tags": [
+                    "Edital"
+                ],
+                "security": [
+                    {
+                        "tokenAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    }
+                }
+            }
+        }
+    }
+}

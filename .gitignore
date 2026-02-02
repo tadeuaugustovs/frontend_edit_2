@@ -22,5 +22,9 @@ reports/
 .tmp/
 *.local
 .kiro/
+<<<<<<< HEAD
 
+=======
+agentes-edite-controlpanel/
+>>>>>>> develop
 django_backend/
