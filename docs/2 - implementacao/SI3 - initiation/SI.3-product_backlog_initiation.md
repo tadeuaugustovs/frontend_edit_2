@@ -31,18 +31,28 @@
 *   **As a** Manager, **I want** to publish a new Edital, **so that** applicants can see it.
 *   **AC1**: Must allow PDF upload.
 *   **AC2**: Title is mandatory.
-*   **GitHub Issue**: [#2]
+*   **GitHub Issue**: [#2](https://github.com/tadeuaugustovs/frontend_edit_2/issues/2)
 *   **Status**: Done
 
 ### US-103: List Editais
 *   **As a** Manager, **I want** to see a list of all Editais, **so that** I can manage them.
 *   **AC1**: Show Title, ID, Status and Description.
 *   **AC2**: Support filtering by status and search by title/description.
-*   **GitHub Issue**: [#1]
-*   **Status**: In Progress
+*   **GitHub Issue**: [#1](https://github.com/tadeuaugustovs/frontend_edit_2/issues/1)
+*   **Status**: Done
 
 ### TASK-101: Modularize HomePage.vue
 *   **Objective**: Refactor the monolithic `HomePage.vue` into smaller, reusable components and composables.
 *   **Pattern**: Component-Based Architecture + Composition API Composables.
-*   **GitHub Issue**: [#3]
-*   **Status**: In Progress
+*   **GitHub Issue**: [#4](https://github.com/tadeuaugustovs/frontend_edit_2/issues/4)
+*   **Status**: Done
+
+### TASK-102: Mock Login Profile Fetch
+*   **Objective**: Fetch user data from /api/auth/me/ to remove hardcoded frontend objects.
+*   **GitHub Issue**: [#5](https://github.com/tadeuaugustovs/frontend_edit_2/issues/5)
+*   **Status**: Done
+
+### TASK-103: Disable Metrics Card
+*   **Objective**: Hide the "Métricas e Análises" card as requested.
+*   **GitHub Issue**: [#6](https://github.com/tadeuaugustovs/frontend_edit_2/issues/6)
+*   **Status**: Done
